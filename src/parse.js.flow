@@ -1,0 +1,396 @@
+// @flow
+
+const HTTPSnippet = require('httpsnippet');
+const cheerio = require('cheerio');
+const markdownIt = require('markdown-it');
+const hljs = require('highlight.js');
+const util = require('./util');
+
+class RefractParser {
+    languages: Array<Object> = [
+        {name: 'curl', displayName: 'cURL', snippet: {target: 'shell', client: 'curl'}, hljs: 'bash'},
+        {name: 'node', displayName: 'NodeJS', snippet: {target: 'node', client: 'request'}, hljs: 'javascript'},
+        {name: 'python', displayName: 'Python', snippet: {target: 'python', client: 'python3'}, hljs: 'python'},
+        {name: 'java', displayName: 'Java', snippet: {target: 'java', client: 'okhttp'}, hljs: 'java'},
+        {name: 'ruby', displayName: 'Ruby', snippet: {target: 'ruby', client: 'native'}, hljs: 'ruby'},
+        {name: 'php', displayName: 'PHP', snippet: {target: 'php', client: 'ext-curl'}, hljs: 'php'},
+        {name: 'go', displayName: 'Go', snippet: {target: 'go', client: 'native'}, hljs: 'go'}
+    ];
+
+    options: {
+        apiUrl: 'http://example.com/api/v1'
+    };
+
+    markdownIt: markdownIt;
+
+    constructor(options: Object) {
+        this.options = Object.assign({}, this.options, options);
+
+        // Markdown parser
+        this.markdownIt = markdownIt({
+            html: true,
+            linkify: true,
+            typographer: true
+        });
+
+        this.markdownIt.use(require('markdown-it-anchor'), {
+            permalink: true
+        });
+
+        // Highlight.js
+        hljs.configure({
+            tabReplace: '    ',
+            useBR: true,
+            languages: this.languages.map(lang => lang.hljs)
+        });
+    }
+
+    parse(doc: Object) {
+        if (!doc.element === 'parseResult') {
+            return;
+        }
+
+        return {
+            type: 'result',
+            content: util.sanitize(
+                doc.content.map(content => {
+                    return this._parse(content, {}, {type: 'result'}).current;
+                })
+            )
+        };
+    }
+
+    // TODO: Add all element types
+
+    _parse(doc: Object, current: Object = {}, parent: Object = {}): Object {
+        switch (doc.element) {
+            case 'copy':
+                ({doc, current, parent} = this._parseCopy(doc, current, parent));
+                break;
+            case 'category':
+                ({doc, current, parent} = this._parseCategory(doc, current, parent));
+                break;
+            default:
+                break;
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseCopy(doc: Object, current: Object, parent: Object): Object {
+        let description = this.markdownIt.render(doc.content);
+        let $ = cheerio.load(description);
+
+        parent.description = {
+            text: description,
+            links: $('.header-anchor').map((index, el) => {
+                return $(el).attr('href');
+            }).toArray()
+        };
+
+        return {
+            doc: doc,
+            current: undefined,
+            parent: parent
+        };
+    }
+
+    _parseCategory(doc: Object, current: Object, parent: Object): Object {
+        let meta: Object = this._getMeta(doc.meta);
+        current.type = meta.class;
+
+        if (current.type === 'dataStructures') {
+            current.title = meta.title;
+            current.content = doc.content.map(ds => {
+                let content = ds.content && ds.content[0];
+                return {
+                    id: content.meta && content.meta.id,
+                    content: content
+                };
+            });
+        } else {
+            current.id = 'group-' + util.slugify(meta.title || parent.title);
+            current.title = meta.title;
+            current.content = util.sanitize(
+                doc.content.map(content => {
+                    return this._parse(content, {}, current).current;
+                })
+            );
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseResource(doc: Object, current: Object, parent: Object): Object {
+        let meta: Object = this._getMeta(doc.meta);
+
+        current.type = 'resource';
+        current.title = meta.title;
+        current.id = 'resource-' + util.slugify(meta.title);
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(
+            doc.content.map(content => {
+                return this._parse(content, {}, current).current;
+            })
+        );
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseTransition(doc: Object, current: Object, parent: Object): Object {
+        let meta: Object = this._getMeta(doc.meta);
+
+        current.type = 'transition';
+        current.title = meta.title;
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(
+            doc.content.map(content => {
+                return this._parse(content, {}, current).current;
+            })
+        );
+
+        let method = util.at(current, 'content.0.content.0.props.method');
+        current.id = 'transition-' + util.slugify(meta.title + '-' + method);
+        current.xhrContent = this._xhrContent(current, parent);
+        current.snippets = [];
+
+        for (let lang of this.languages) {
+            current.snippets[lang.name] = {
+                content: unescape((new HTTPSnippet(current.xhrContent)).convert(lang.snippet.target, lang.snippet.type)),
+                hljs: lang.hljs
+            };
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseDataStructure(doc: Object, current: Object, parent: Object): Object {
+        current.type = 'dataStructure';
+        current.content = doc.content;
+
+        let trId = util.capitalize(current.content[0] && current.content[0].meta && current.content[0].meta.id);
+
+        if (trId) {
+            current.id = 'object-' + util.slugify(trId);
+            current.title = trId + ' Object';
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseHttpTransaction(doc: Object, current: Object, parent: Object): Object {
+        let meta: Object = this._getMeta(doc.meta);
+
+        current.type = 'httpTransaction';
+        current.title = meta.title;
+        current.props = {};
+        current.content = util.sanitize(
+            doc.content.map(content => {
+                return this._parse(content, {}, current).current;
+            })
+        );
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseHttpRequest(doc: Object, current: Object, parent: Object): Object {
+        let meta: Object = this._getMeta(doc.meta);
+
+        current.type = 'httpRequest';
+        current.title = meta.title;
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(
+            doc.content.map(content => {
+                return this._parse(content, {}, current).current;
+            })
+        );
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseHttpResponse(doc: Object, current: Object, parent: Object): Object {
+        let meta: Object = this._getMeta(doc.meta);
+
+        current.type = 'httpResponse';
+        current.title = meta.title;
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(
+            doc.content.map(content => {
+                return this._parse(content, {}, current).current;
+            })
+        );
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseAsset(doc: Object, current: Object, parent: Object): Object {
+        let meta: Object = this._getMeta(doc.meta);
+
+        if (meta.class === 'messageBody') {
+            current.type = 'body';
+            current.title = meta.title;
+            current.content = doc.content;
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _getMeta(meta: Object = {}) {
+        let classes = '';
+
+        if (meta.classes && Array.isArray(meta.classes) && meta.classes.length > 0) {
+            classes = meta.classes[0];
+        }
+
+        return {
+            class: classes,
+            title: meta.title
+        };
+    }
+
+    _getProps(props: Object = {}) {
+        let urlParameters: Array<Object> = [];
+        let headers: Array<Object> = [];
+        let data: string = '';
+
+        if (props.hrefVariables && props.hrefVariables.content) {
+            for (let variable of props.hrefVariables.content) {
+                urlParameters.push({
+                    wfn: variable.meta && variable.meta.description,
+                    key: variable.content && variable.content.key,
+                    value: variable.content && variable.content.value
+                });
+            }
+        }
+
+        if (props.headers && props.headers.content) {
+            for (let variable of props.headers.content) {
+                headers.push({
+                    key: variable.content && variable.content.key,
+                    value: variable.content && variable.content.value
+                });
+            }
+        }
+
+        if (props.data && props.data.element === 'dataStructure') {
+            data = props.data.content;
+        }
+
+        return {
+            url: props.href,
+            method: props.method,
+            data: data,
+            headers: headers,
+            statusCode: props.statusCode,
+            urlParameters: urlParameters
+        };
+    }
+
+    _xhrContent(transition: Object, resource: Object) {
+        let httpRequest: Object = util.at(transition, 'content.0.content.0');
+
+        let requestProps: Object = httpRequest && httpRequest.props;
+        requestProps = requestProps || {};
+
+        let transProps: Object = transition.props || {};
+
+        let urlParameters: Array<Object> = Object.assign(transProps.urlParameters, requestProps.urlParameters);
+        let postData = httpRequest.content.find(c => c.type === 'body');
+
+        let mimeType: string = requestProps.headers.find(c => c.type === 'Content-Type') || 'application/json';
+
+        let url: string = requestProps.url || transProps.url;
+        let queryStrings: Array<Object> = [];
+
+        if (!url && resource.type === 'resource') {
+            url = resource.props && resource.props.url;
+            if (resource.props.urlParameters) {
+                urlParameters = Object.assign(resource.props.urlParameters, urlParameters);
+            }
+        }
+
+        let hrefSplits: Array<string> = (url && url.split('{?')) || [];
+        if (hrefSplits.length > 1) {
+            url = hrefSplits[0];
+            let qs = hrefSplits[1].replace('}', '').split(',');
+
+            queryStrings = qs.map(qs => ({
+                name: qs.trim(),
+                value: '{' + qs.trim() + '}'
+            }));
+        }
+
+        let originalUrl = url;
+
+        for (let param: Object of urlParameters) {
+            let key = param.key && param.key.content;
+            let value = param.value && param.value.content;
+
+            if (!key || !value) {
+                continue;
+            }
+
+            let replaceRegex = new RegExp('{' + key + '}', 'g');
+            url = url.replace(replaceRegex, value);
+        }
+
+        return {
+            method: requestProps.method,
+            url: this.options.apiUrl + url,
+            originalUrl: this.options.apiUrl + originalUrl,
+            httpVersion: 'unknown',
+            queryString: queryStrings,
+            headers: requestProps.headers.map(header => ({
+                name: header.key && header.key.content,
+                value: header.value && header.value.content
+            })),
+            attributes: Object.assign(transProps.data, requestProps.data),
+            urlParameters: urlParameters,
+            postData: {
+                mimeType: mimeType,
+                postData: postData.content
+            },
+            headersSize: -1,
+            bodySize: -1,
+            comment: ''
+        };
+    }
+}
+
+module.exports = RefractParser;

@@ -1,318 +1,469 @@
-var HTTPSnippet = require('httpsnippet');
-var cheerio = require('cheerio');
-var util = require('./util');
-var host = require('./host');
+'use strict';
 
-var slugify = util.slugify;
-var _extends = util._extends;
-var sanitize = util.sanitize;
-var capitalize = util.capitalize;
-var highlight = util.highlight;
-var at = util.at;
-var markdownIt = require('markdown-it');
+var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
-var md = markdownIt({
-	html: true,
-	linkify: true,
-	typographer: true
-}).use(require('markdown-it-anchor'), {
-	permalink: true
-});
+var _getIterator3 = _interopRequireDefault(_getIterator2);
 
-module.exports = function parse(result, current, parent) {
-	switch(result.element) {
-		case 'copy': 
-			parent.description = markdown(result.content);
-			current = undefined;
-			break;
-		case 'parseResult' :
-			current.type = 'result';
-			current.content = sanitize(
-				result.content.map(
-					function(c) { 
-						return parse(c, {}, current) 
-					}
-				)
-			);
-			break;
-		case 'category':
-			var meta = getMeta(result.meta);
-			current.type = meta.class;
-			switch(current.type) {
-				case 'dataStructures':
-					var meta = getMeta(result.meta);
-					current.type = 'dataStructures';
-					current.title = meta.title;
-					current.content = parseDatastructures(result.content);
-					break;
-				default:
-					current.id = 'group-' + slugify(meta.title || parent.title);
-					current.title = meta.title;
-					current.content = sanitize(
-						result.content.map(
-							function(c) {
-								return parse(c, {}, current)
-							}
-						)
-					);
-					break;
-			}
-			break;
-		case 'resource':
-			var meta = getMeta(result.meta);
-			current.type = 'resource';
-			current.title = meta.title;
-			current.id = 'resource-' + slugify(meta.title);
-			current.props = getProps(result.attributes);
-			current.content = sanitize(
-				result.content.map(
-					function(c) {
-						return parse(c, {}, current)
-					}
-				)
-			);
-			break;
-		case 'transition':
-			var meta = getMeta(result.meta);
-			current.type = 'transition';
-			current.title = meta.title;
-			current.props = getProps(result.attributes);
-			current.content = sanitize(result.content.map(function(c) { return parse(c, {}, current) }));
-			var method = at(current, 'content.0.content.0.props.method'); 
-			current.id = 'transition-' + slugify(meta.title + '-' + method);
-			current.xhrContent = xhrContent(current, parent);
-			current.snippet = unescape((new HTTPSnippet(current.xhrContent)).convert('shell', 'curl'));
-			current.snippets = [];
+var _assign = require('babel-runtime/core-js/object/assign');
 
-			var lang = [{ 
-				name: 'curl',
-				target: 'shell',
-				type: 'curl'
-			},{
-				name: 'node',
-				target: 'node',
-				type: 'request'
-			}, {
-				name: 'python',
-				target: 'python',
-				type: 'python3'
-			},{
-				name: 'java',
-				target: 'java',
-				type: 'okhttp'
-			}, {
-				name: 'ruby',
-				target: 'ruby',
-				type: 'native'
-			}, {
-				name: 'php',
-				target: 'php',
-				type: 'ext-curl'
-			}, {
-				name: 'go',
-				target: 'go',
-				type: 'native'
-			}];
-			
-			lang.forEach(function(l) {
-				current.snippets[l.name] = highlight(
-					unescape((new HTTPSnippet(current.xhrContent)).convert(l.target, l.type)));
-			});
+var _assign2 = _interopRequireDefault(_assign);
 
-			break;
-		case 'dataStructure':
-			var meta = getMeta(result.meta);
-			current.type = 'dataStructure';
-			current.content = result.content;
-			var trId = capitalize(current.content[0] && current.content[0].meta && current.content[0].meta.id)
-            if (trId) {
-			    current.id = 'object-' + slugify(trId);
-			    current.title = trId + ' Object';
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const HTTPSnippet = require('httpsnippet');
+const cheerio = require('cheerio');
+const markdownIt = require('markdown-it');
+const hljs = require('highlight.js');
+const util = require('./util');
+
+class RefractParser {
+
+    constructor(options) {
+        this.languages = [{ name: 'curl', displayName: 'cURL', snippet: { target: 'shell', client: 'curl' }, hljs: 'bash' }, { name: 'node', displayName: 'NodeJS', snippet: { target: 'node', client: 'request' }, hljs: 'javascript' }, { name: 'python', displayName: 'Python', snippet: { target: 'python', client: 'python3' }, hljs: 'python' }, { name: 'java', displayName: 'Java', snippet: { target: 'java', client: 'okhttp' }, hljs: 'java' }, { name: 'ruby', displayName: 'Ruby', snippet: { target: 'ruby', client: 'native' }, hljs: 'ruby' }, { name: 'php', displayName: 'PHP', snippet: { target: 'php', client: 'ext-curl' }, hljs: 'php' }, { name: 'go', displayName: 'Go', snippet: { target: 'go', client: 'native' }, hljs: 'go' }];
+
+        this.options = (0, _assign2.default)({}, this.options, options);
+
+        this.markdownIt = markdownIt({
+            html: true,
+            linkify: true,
+            typographer: true
+        });
+
+        this.markdownIt.use(require('markdown-it-anchor'), {
+            permalink: true
+        });
+
+        hljs.configure({
+            tabReplace: '    ',
+            useBR: true,
+            languages: this.languages.map(lang => lang.hljs)
+        });
+    }
+
+    parse(doc) {
+        if (!doc.element === 'parseResult') {
+            return;
+        }
+
+        return {
+            type: 'result',
+            content: util.sanitize(doc.content.map(content => {
+                return this._parse(content, {}, { type: 'result' }).current;
+            }))
+        };
+    }
+
+    _parse(doc, current = {}, parent = {}) {
+        switch (doc.element) {
+            case 'copy':
+                var _parseCopy = this._parseCopy(doc, current, parent);
+
+                doc = _parseCopy.doc;
+                current = _parseCopy.current;
+                parent = _parseCopy.parent;
+
+                break;
+            case 'category':
+                var _parseCategory = this._parseCategory(doc, current, parent);
+
+                doc = _parseCategory.doc;
+                current = _parseCategory.current;
+                parent = _parseCategory.parent;
+
+                break;
+            default:
+                break;
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseCopy(doc, current, parent) {
+        let description = this.markdownIt.render(doc.content);
+        let $ = cheerio.load(description);
+
+        parent.description = {
+            text: description,
+            links: $('.header-anchor').map((index, el) => {
+                return $(el).attr('href');
+            }).toArray()
+        };
+
+        return {
+            doc: doc,
+            current: undefined,
+            parent: parent
+        };
+    }
+
+    _parseCategory(doc, current, parent) {
+        let meta = this._getMeta(doc.meta);
+        current.type = meta.class;
+
+        if (current.type === 'dataStructures') {
+            current.title = meta.title;
+            current.content = doc.content.map(ds => {
+                let content = ds.content && ds.content[0];
+                return {
+                    id: content.meta && content.meta.id,
+                    content: content
+                };
+            });
+        } else {
+            current.id = 'group-' + util.slugify(meta.title || parent.title);
+            current.title = meta.title;
+            current.content = util.sanitize(doc.content.map(content => {
+                return this._parse(content, {}, current).current;
+            }));
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseResource(doc, current, parent) {
+        let meta = this._getMeta(doc.meta);
+
+        current.type = 'resource';
+        current.title = meta.title;
+        current.id = 'resource-' + util.slugify(meta.title);
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(doc.content.map(content => {
+            return this._parse(content, {}, current).current;
+        }));
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseTransition(doc, current, parent) {
+        let meta = this._getMeta(doc.meta);
+
+        current.type = 'transition';
+        current.title = meta.title;
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(doc.content.map(content => {
+            return this._parse(content, {}, current).current;
+        }));
+
+        let method = util.at(current, 'content.0.content.0.props.method');
+        current.id = 'transition-' + util.slugify(meta.title + '-' + method);
+        current.xhrContent = this._xhrContent(current, parent);
+        current.snippets = [];
+
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = (0, _getIterator3.default)(this.languages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                let lang = _step.value;
+
+                current.snippets[lang.name] = {
+                    content: unescape(new HTTPSnippet(current.xhrContent).convert(lang.snippet.target, lang.snippet.type)),
+                    hljs: lang.hljs
+                };
             }
-			break;
-		case 'httpTransaction':
-			var meta = getMeta(result.meta);
-			current.type = 'httpTransaction';
-			current.title = meta.title;
-			current.props = {};
-			current.content = sanitize(result.content.map(function(c) { return parse(c, {}, current) }));
-			break;
-		case 'httpRequest':
-			var meta = getMeta(result.meta);
-			current.type = 'httpRequest';
-			current.title = meta.title;
-			current.props =  getProps(result.attributes);
-			current.content = sanitize(result.content.map(function(c) { return parse(c, {}, current) }));
-			break;
-		case 'httpResponse':
-			var meta = getMeta(result.meta);
-			current.type = 'httpResponse';
-			current.title = meta.title;
-			current.props = getProps(result.attributes);
-			current.content = sanitize(result.content.map(function(c) { return parse(c, {}, current) }));
-			break;
-		case 'asset':
-			var meta = getMeta(result.meta);
-			if (meta.class === 'messageBody') {
-				current.type = 'body';
-				current.title = meta.title;
-				current.content = highlight(result.content);	
-			}
-			break;
-		default:
-	}
-	return current;
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseDataStructure(doc, current, parent) {
+        current.type = 'dataStructure';
+        current.content = doc.content;
+
+        let trId = util.capitalize(current.content[0] && current.content[0].meta && current.content[0].meta.id);
+
+        if (trId) {
+            current.id = 'object-' + util.slugify(trId);
+            current.title = trId + ' Object';
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseHttpTransaction(doc, current, parent) {
+        let meta = this._getMeta(doc.meta);
+
+        current.type = 'httpTransaction';
+        current.title = meta.title;
+        current.props = {};
+        current.content = util.sanitize(doc.content.map(content => {
+            return this._parse(content, {}, current).current;
+        }));
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseHttpRequest(doc, current, parent) {
+        let meta = this._getMeta(doc.meta);
+
+        current.type = 'httpRequest';
+        current.title = meta.title;
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(doc.content.map(content => {
+            return this._parse(content, {}, current).current;
+        }));
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseHttpResponse(doc, current, parent) {
+        let meta = this._getMeta(doc.meta);
+
+        current.type = 'httpResponse';
+        current.title = meta.title;
+        current.props = this._getProps(doc.attributes);
+        current.content = util.sanitize(doc.content.map(content => {
+            return this._parse(content, {}, current).current;
+        }));
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _parseAsset(doc, current, parent) {
+        let meta = this._getMeta(doc.meta);
+
+        if (meta.class === 'messageBody') {
+            current.type = 'body';
+            current.title = meta.title;
+            current.content = doc.content;
+        }
+
+        return {
+            doc: doc,
+            current: current,
+            parent: parent
+        };
+    }
+
+    _getMeta(meta = {}) {
+        let classes = '';
+
+        if (meta.classes && Array.isArray(meta.classes) && meta.classes.length > 0) {
+            classes = meta.classes[0];
+        }
+
+        return {
+            class: classes,
+            title: meta.title
+        };
+    }
+
+    _getProps(props = {}) {
+        let urlParameters = [];
+        let headers = [];
+        let data = '';
+
+        if (props.hrefVariables && props.hrefVariables.content) {
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = (0, _getIterator3.default)(props.hrefVariables.content), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    let variable = _step2.value;
+
+                    urlParameters.push({
+                        wfn: variable.meta && variable.meta.description,
+                        key: variable.content && variable.content.key,
+                        value: variable.content && variable.content.value
+                    });
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+        }
+
+        if (props.headers && props.headers.content) {
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = (0, _getIterator3.default)(props.headers.content), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    let variable = _step3.value;
+
+                    headers.push({
+                        key: variable.content && variable.content.key,
+                        value: variable.content && variable.content.value
+                    });
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+        }
+
+        if (props.data && props.data.element === 'dataStructure') {
+            data = props.data.content;
+        }
+
+        return {
+            url: props.href,
+            method: props.method,
+            data: data,
+            headers: headers,
+            statusCode: props.statusCode,
+            urlParameters: urlParameters
+        };
+    }
+
+    _xhrContent(transition, resource) {
+        let httpRequest = util.at(transition, 'content.0.content.0');
+
+        let requestProps = httpRequest && httpRequest.props;
+        requestProps = requestProps || {};
+
+        let transProps = transition.props || {};
+
+        let urlParameters = (0, _assign2.default)(transProps.urlParameters, requestProps.urlParameters);
+        let postData = httpRequest.content.find(c => c.type === 'body');
+
+        let mimeType = requestProps.headers.find(c => c.type === 'Content-Type') || 'application/json';
+
+        let url = requestProps.url || transProps.url;
+        let queryStrings = [];
+
+        if (!url && resource.type === 'resource') {
+            url = resource.props && resource.props.url;
+            if (resource.props.urlParameters) {
+                urlParameters = (0, _assign2.default)(resource.props.urlParameters, urlParameters);
+            }
+        }
+
+        let hrefSplits = url && url.split('{?') || [];
+        if (hrefSplits.length > 1) {
+            url = hrefSplits[0];
+            let qs = hrefSplits[1].replace('}', '').split(',');
+
+            queryStrings = qs.map(qs => ({
+                name: qs.trim(),
+                value: '{' + qs.trim() + '}'
+            }));
+        }
+
+        let originalUrl = url;
+
+        var _iteratorNormalCompletion4 = true;
+        var _didIteratorError4 = false;
+        var _iteratorError4 = undefined;
+
+        try {
+            for (var _iterator4 = (0, _getIterator3.default)(urlParameters), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                let param = _step4.value;
+
+                let key = param.key && param.key.content;
+                let value = param.value && param.value.content;
+
+                if (!key || !value) {
+                    continue;
+                }
+
+                let replaceRegex = new RegExp('{' + key + '}', 'g');
+                url = url.replace(replaceRegex, value);
+            }
+        } catch (err) {
+            _didIteratorError4 = true;
+            _iteratorError4 = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                    _iterator4.return();
+                }
+            } finally {
+                if (_didIteratorError4) {
+                    throw _iteratorError4;
+                }
+            }
+        }
+
+        return {
+            method: requestProps.method,
+            url: this.options.apiUrl + url,
+            originalUrl: this.options.apiUrl + originalUrl,
+            httpVersion: 'unknown',
+            queryString: queryStrings,
+            headers: requestProps.headers.map(header => ({
+                name: header.key && header.key.content,
+                value: header.value && header.value.content
+            })),
+            attributes: (0, _assign2.default)(transProps.data, requestProps.data),
+            urlParameters: urlParameters,
+            postData: {
+                mimeType: mimeType,
+                postData: postData.content
+            },
+            headersSize: -1,
+            bodySize: -1,
+            comment: ''
+        };
+    }
 }
 
-function getMeta(meta) {
-	meta = meta || {};
-	var claz = '';
-	if (meta.classes && Array.isArray(meta.classes)) {
-		claz = meta.classes[0]
-	}
-	return {
-		class: claz,
-		title: meta.title
-	}
-}
-
-function getProps(props){
-	props = props || {};
-	var url = props.href;
-	var statusCode = props.statusCode;
-	var method = props.method;
-	var urlParameters = [];
-	var headers = [];
-	var data = '';
-	try {
-		props.hrefVariables.content.forEach(function(variable) {
-			urlParameters.push({
-				wfn : variable.meta && variable.meta.description,
-				key: variable.content && variable.content.key,
-				value: variable.content && variable.content.value
-			})
-		});	
-	} catch (e) {
-	}
-	try {
-		props.headers.content.forEach(function(variable) {
-			headers.push({
-				key: variable.content && variable.content.key,
-				value: variable.content && variable.content.value
-			})
-		});	
-	} catch (e) {
-	}
-
-	if (props.data && props.data.element === 'dataStructure') {
-		data = props.data.content;
-	}
-	return {
-		url: url,
-		method: method,
-		data: data,
-		headers: headers,
-		statusCode: statusCode,
-		urlParameters: urlParameters
-	}
-	
-}
-
-function getCopy(content) {
-	try {
-		return content.find(function(c) { return c.element === 'copy' }).content;	
-	}
-	catch (e) {
-		console.error('Error while printing content of a copy')
-		return '';
-	}
-}
-
-function parseDatastructures(dataStructures) {
-	return dataStructures.map(function(ds) {
-		var content = ds.content && ds.content[0];
-		var id = content.meta && content.meta.id;
-		return { id: id , content: content };
-	})
-}
-
-
-function markdown(description) {
-	var mdText = md.render(description);
-	var $ = cheerio.load(mdText);
-	return {
-		text: mdText,
-		links: $('.header-anchor').map(function(index, el) { return $(el).attr('href'); }).toArray()
-	}
-}
-
-function xhrContent(transition, resource) {
-	var HOST = host.get();
-	var httpRequest = at(transition, 'content.0.content.0'); 
-	var requestProps = httpRequest && httpRequest.props;
-	requestProps = requestProps || {};
-	transProps = transition.props || {};
-	var method = requestProps && requestProps.method;
-	var urlParameters = _extends(transProps.urlParameters, requestProps.urlParameters);
-	var headers = requestProps.headers;
-	var postData = httpRequest.content.find(function(c) { return c.type=== 'body' } );
-	var mimeType = headers.find(function(c) { 
-		return c.type=== 'Content-Type' 
-	} ) || 'application/json';
-	postData = postData && postData.content;
-	var url = requestProps.url || transProps.url, 
-		queryStrings=[];
-
-
-	if (!url && resource.type === 'resource') {
-		url = resource.props && resource.props.url;
-		if (resource.props.urlParameters) {
-			urlParameters = _extends(resource.props.urlParameters, urlParameters) 
-		}
-	}
-	hrefSplits = url && url.split('{?') || [];
-	if (hrefSplits.length > 1) {
-		url = hrefSplits[0];
-		queryStrings = hrefSplits[1].replace('}', '').split(',');
-	}
-	queryStrings = queryStrings.map(function(qs) {
-		qs = qs.trim();
-		return {
-			name: qs,
-			value: '{' + qs + '}'
-		}
-	});
-	var originalUrl = url;
-	urlParameters.forEach(function(param) {
-		var key = param.key && param.key.content;
-		var value = param.value && param.value.content;
-		if (typeof key !== 'undefined' && typeof value !== 'undefined') {
-			if (url.indexOf('{' + key + '}') !== -1) {
-				url = url.replaceAll('{' + key + '}', value);
-			}
-		}
-	});
-	
-	return {
-		method: method,
-		url: HOST + url,
-		originalUrl: HOST + originalUrl,
-		httpVersion: 'unknown',
-		queryString: queryStrings,
-		headers: headers.map(function(h) {
-			return {
-				name: h.key && h.key.content,
-				value: h.value && h.value.content
-			}
-		}),
-		attributes: _extends(transProps.data, requestProps.data),
-		urlParameters: urlParameters,
-		postData: {
-			mimeType: mimeType,
-			postData: postData
-		},
-		headersSize: -1,
-		bodySize: -1,
-		comment: ''
-	}
-}
+module.exports = RefractParser;

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 'use strict';
 
 var program = require('commander');
@@ -11,6 +10,11 @@ program
 	.option('-t, --headerhtml <headerhtml>', 'HTML of header')
 	.option('-c, --css <css>', 'CSS file location')
 	.parse(process.argv);
+
+if (!program.hasOwnProperty('filepath') || !program.hasOwnProperty('destination') || program.destination.length === 0 || program.filepath.length === 0) {
+	console.log("Usage: docprint --filepath <filepath> --destination <destination>");
+	process.exit();
+}
 
 require('../src')({
 	filepath: program.filepath,

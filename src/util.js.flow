@@ -1,0 +1,53 @@
+// @flow
+
+function sanitize(input: Array<any>) {
+    return input.filter(a => a);
+}
+
+function capitalize(str: ?string) {
+    return str && str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function at(o: ?Object, path: ?string, def: ?any): any {
+    if (!o || !path) {
+        return o;
+    }
+
+    let pointer = o;
+    let failed = false;
+
+    for (let p of path.split('.')) {
+        if (pointer[p] !== null && pointer[p] !== undefined && !failed) {
+            pointer = pointer[p];
+        } else {
+            failed = true;
+        }
+    }
+
+    return failed ? (o[path] || def) : pointer;
+}
+
+function stripSlash(str: ?string) {
+    if (str && str.endsWith('/')) {
+        return str.substr(0, str.length - 1);
+    }
+
+    return str;
+}
+
+function slugify(str: string) {
+    return str && str.toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]+/g, '')
+        .replace(/--+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
+}
+
+module.exports = {
+    slugify: slugify,
+    capitalize: capitalize,
+    at: at,
+    stripSlash: stripSlash,
+    sanitize: sanitize
+};
