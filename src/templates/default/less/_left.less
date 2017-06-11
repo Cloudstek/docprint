@@ -1,0 +1,135 @@
+.doc-body .group-heading {
+	font-size: 24px;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 32px;
+    padding: 10px 0;
+    margin: 20px 0;
+}
+
+.doc-body .resource-heading {
+	padding: 10px 0px;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 32px;
+}
+
+.doc-body .transition-heading {
+    color: #292e31;
+    padding: 10px 0px;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 32px
+}
+
+ul.attrs, ul.params {
+	border-top: 1px solid #e1e8ed;
+}
+
+.params .left, .attrs .left, .params .right, .attrs .right {
+    display: inline-block;
+    width: 49.5%;
+    vertical-align: top;
+}
+
+.params .left, .attrs .left {
+	text-align: right;
+    padding-right: 20px;
+    box-sizing: border-box;
+    font-size: 13px;
+    line-height: 21px;
+    word-break: break-all;
+    white-space: normal;
+}
+
+.params .right, .attrs .right {
+	box-sizing: border-box;
+	padding-left: 10px;
+}
+
+li.param, li.attr {
+	padding: 17px 0;
+    border-bottom: 1px solid #f0f4f7;
+    line-height: 24px;
+}
+
+li.param:last-child, li.attr:last-child {
+	border-bottom: none;
+}
+
+
+.left {
+	color: #aaa;
+}
+
+.left span {
+	padding-right: 10px;
+}
+
+.left .key {
+    color: #000;
+}
+
+.left span.key{
+	font-weight: 600;
+}
+
+.left .type {
+	font-style: italic;
+	font-size: 12px;
+}
+
+.left .example {
+	font-size: 11px;
+}
+
+.left .required, .left .optional {
+	color: #e66e33;
+	text-transform: uppercase;
+	font-size: 10px;
+    font-weight: 600;
+}
+.show-child-attr {
+	color: #0095dd;
+	padding: 6px 0;
+}
+
+.child-attr {
+	border-radius: 5px;
+}
+
+.child-attr > .attrs {
+	display: none;
+}
+
+.child-attr > .show-child-attr > .expand {
+	display: block;
+	cursor: pointer;
+}
+.child-attr > .show-child-attr > .close {
+	display: none;
+	cursor: pointer;
+}
+
+.child-attr.show {
+	box-shadow: 0 0 1px 0px rgba(128, 128, 128, 0.5);
+}
+
+.child-attr.show > .attrs{
+	display: block;
+}
+.child-attr.show > .show-child-attr > .expand {
+	display: none;
+}
+.child-attr.show > .show-child-attr > .close {
+	display: block;
+}
+
+.part-heading {
+	color: #939da3;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    text-transform: uppercase;
+    margin: 15px 0;
+}

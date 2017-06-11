@@ -5,10 +5,14 @@
     <head>
         <meta charset="utf-8">
 
-        <title>{{ title }} API</title>
+        <title>{{ doc.content[0].title | capitalize }} API</title>
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Source+Code+Pro">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Source+Code+Pro" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css" integrity="sha256-akwTLZec/XAFvgYgVH1T5/369lhA2Efr22xzCNl1nHs=" crossorigin="anonymous" />
+
+        <style type="text/css">
+            {{ 'less/style.less' | less | safe }}
+        </style>
         <style type="text/css">
             {{ css | safe }}
         </style>
@@ -18,22 +22,22 @@
             {{ header | safe }}
         {% else %}
             <header>
-                <h1>{{ title }} <spanl>API</span></h1>
+                <h1>{{ doc.content[0].title | capitalize }} <span>API</span></h1>
             </header>
         {% endif %}
 
         <div class="documentation">
             <div class="top-header">
                 <div class="lang-header part-header">
-                    {#
                     <ul>
                         {% for lang in languages %}
-                            <li data-lang="{{ lang.hljs }}">{{ lang.name }}</li>
+                            <li data-lang="{{ lang.hljs }}">{{ lang.displayName }}</li>
                         {% endfor %}
-                    </ul>#}
-                    {% for lang in languages %}
-                        <span class="lan" data-lang="{{ lang.jljs }}">{{ lang.displayName }}</span>
-                    {% endfor %}
+                        <li data-lang="none">None</li>
+                    </ul>
+                    {#{% for lang in languages %}
+                        <span class="lan" data-lang="{{ lang.hljs }}">{{ lang.displayName }}</span>
+                    {% endfor %}#}
                 </div>
             </div>
 
@@ -133,22 +137,22 @@
                                         <div class="col-6 rhs">
                                             {# Definition #}
                                             <div class="api-definition">
-                                                <div class="api-definition-heading rhs-heading">Definition</div>
-                                                <div class="api-definition-description rhs-highlight code">
+                                                <div class="rhs-heading">Definition</div>
+                                                <div class="rhs-highlight code">
                                                     <div class="hljs">
-                                                        <span class="hljs-attribute">{{ transition.xhrContent.method }}</span> {{ transition.xhrContent.originalUrl }}
+                                                        <span class="hljs-attribute">{{ transition.xhrContent.method }}</span> {{ transition.xhrContent.originalUrl | highlightUrl | safe }}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             {# Request #}
-                                            <div class="sample-request-heading rhs-heading">Request</div>
+                                            <div class="rhs-heading big">Request</div>
 
                                             {# Request Headers #}
                                             {% if transition.xhrContent.headers.length %}
                                                 <div class="headers">
-                                                    <div class="headers-heading rhs-heading">Request Headers</div>
-                                                    <div class="headers-description rhs-highlight code">
+                                                    <div class="rhs-heading">Request Headers</div>
+                                                    <div class="rhs-highlight code">
                                                         <div class="hljs">
                                                             {%- for header in transition.xhrContent.headers -%}
                                                                 <span class="hljs-attribute">{{ header.name }}</span>: {{ header.value }}
@@ -161,8 +165,8 @@
                                             {# Request Body #}
                                             {% for transaction in transition.content[0].content %}
                                                 {% if transaction.type === 'httpRequest' and transaction.content[0].type === 'body' %}
-                                                    <div class="sample-request-body rhs-heading">Request Body</div>
-                                                    <div class="sample-request-body-description rhs-highlight">
+                                                    <div class="rhs-heading">Request Body</div>
+                                                    <div class="rhs-highlight">
                                                         <pre><code>
                                                             {{- transaction.content[0].content -}}
                                                         </code></pre>
@@ -173,8 +177,8 @@
                                             {# Request Example #}
                                             {% if transition.snippets %}
                                                 <div class="sample-request">
-                                                    <div class="sample-request-heading rhs-heading">Example Request</div>
-                                                    <div class="sample-request-description rhs-highlight">
+                                                    <div class="rhs-heading">Example Request</div>
+                                                    <div class="rhs-highlight">
                                                         {%- for lang in languages -%}
                                                             {%- if transition.snippets[lang.name] -%}
                                                                 <pre><code class="{{ lang.hljs }}">
@@ -190,7 +194,7 @@
                                             <div class="sample-response">
                                                 {% for transaction in transition.content[0].content %}
                                                     {% if transaction.type === 'httpResponse' %}
-                                                        <div class="sample-response-heading rhs-heading">
+                                                        <div class="rhs-heading big">
                                                             <span>Response&nbsp;</span>
                                                             <span class="status-code">{{ transaction.props.statusCode }}</span>
                                                         </div>
@@ -198,8 +202,8 @@
                                                         {# Headers #}
                                                         {% if transaction.props.headers.length %}
                                                             <div class="headers">
-                                                                <div class="headers-heading rhs-heading">Response Headers</div>
-                                                                <div class="headers-description rhs-highlight code">
+                                                                <div class="rhs-heading">Response Headers</div>
+                                                                <div class="rhs-highlight code">
                                                                     <div class="hljs">
                                                                         {% for header in transaction.props.headers %}
                                                                             <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }} {% if not loop.last %}<br />{% endif %}
@@ -211,8 +215,8 @@
 
                                                         {# Body #}
                                                         {% if transaction.content[0].type === 'body' %}
-                                                            <div class="sample-response-body rhs-heading">Response Body</div>
-                                                            <div class="sample-response-body-description rhs-highlight">
+                                                            <div class="rhs-heading">Response Body</div>
+                                                            <div class="rhs-highlight">
                                                                 <pre><code>
                                                                     {{- transaction.content[0].content -}}
                                                                 </code></pre>
@@ -240,154 +244,103 @@
             </div>
         </div>
 
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/noframework.waypoints.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/http.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js" integrity="sha256-jDnOKIOq2KNsQZTcBTEnsp76FnfMEttF6AV2DF2fFNE=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/http.min.js" integrity="sha256-ze9TA1yfIP6jEh7+8fVq8CxHsydquQNe9O+P05ueO3w=" crossorigin="anonymous"></script>
+
         <script type="text/javascript">
             hljs.initHighlightingOnLoad();
 
-            function triggerEvent(el, eventName) {
-                if (!el) return;
-                var evt;
-                try {
-                    evt = new window.Event(eventName, {bubbles: true});
-                }
-                catch (e) {
-                    evt = document.createEvent('Event');
-                    evt.initEvent(eventName, true, false);
-                }
-                finally {
-                    el.dispatchEvent(evt);
-                }
-            };
-            var docbody = document.querySelector('.doc-body');
-            docbody.addEventListener('click', function(e) {
-                if (e.target.classList.contains('expand') || e.target.classList.contains('close')) {
-                    var childAttr = e.target.parentNode.parentNode;
-                    childAttr.classList.toggle('show');
-                }
-            });
-            var sidebar = document.querySelector('.sidebar');
-            sidebar.addEventListener('click', function(e) {
-                if (e.target.classList.contains('resource-nav-item')) {
-                    var selected = sidebar.querySelector('.resource-header.expand');
-                    var resourceHeader = e.target.parentNode;
-                    if (selected !== e.target.parentNode) {
-                        selected && selected.classList.remove('expand');
-                        resourceHeader.classList.add('expand');
-                    }
-                } else if (e.target.classList.contains('child-nav-text')) {
-                    var selected = sidebar.querySelector('.child-nav-item.selected');
-                    if (selected !== e.target.parentNode) {
-                        selected && selected.classList.remove('selected');
-                        e.target.parentNode.classList.add('selected');
-                    }
-                } else if (e.target && e.target.parentNode && e.target.parentNode.classList.contains('group-header')) {
-                    var selected = sidebar.querySelector('.resource-header.expand');
-                    selected && selected.classList.remove('expand');
-                    selected = sidebar.querySelector('.child-nav-item.selected');
-                    selected && selected.classList.remove('selected');
-                }
-            });
-            var langBar = document.querySelector('.top-header .lang-header');
-            langBar.addEventListener('click', function(e) {
-                if (e.target.classList.contains('lan')) {
-                    var selectedLang = langBar.querySelector('.selected');
-                    selectedLang = selectedLang && selectedLang.getAttribute('lang')
-                    var targetLang = e.target.getAttribute('lang');
-                    if (window.location.pathname.indexOf('/' + selectedLang) !== -1) {
-                        window.location.pathname = window.location.pathname.replace('/' + selectedLang, '/' + targetLang);
-                    } else if (window.location.search.indexOf(selectedLang) !== -1) {
-                        window.location.search = window.location.search.replace(selectedLang, targetLang);
-                    } else {
-                    }
-                }
-            })
-            var waypoints = document.querySelectorAll('.way-point');
-            function selectSection(navEl) {
-                var selected;
-                if (navEl) {
-                    if (navEl.classList.contains('child-nav-item')) {
-                        var resourceNav = navEl.parentNode.parentNode.parentNode;
-                        selected = sidebar.querySelector('.child-nav-item.selected');
-                        selected && (selected !== navEl) && selected.classList.remove('selected');
-                        selected = sidebar.querySelector('.resource-header.expand');
-                        selected && (selected !== resourceNav) && selected.classList.remove('expand');
-                        resourceNav.classList.add('expand');
-                        navEl.classList.add('selected');
-                    } else if (navEl.classList.contains('resource-nav-item')) {
-                        selected = sidebar.querySelector('.child-nav-item.selected');
-                        selected && (selected !== navEl) && selected.classList.remove('selected');
-                        selected = sidebar.querySelector('.resource-header.expand');
-                        selected && (selected !== resourceNav) && selected.classList.remove('expand');
-                        navEl.parentNode && navEl.parentNode.classList.add('expand');
-                    } else {
-                        selected = sidebar.querySelector('.child-nav-item.selected');
-                        selected && (selected !== navEl) && selected.classList.remove('selected');
-                        selected = sidebar.querySelector('.resource-header.expand');
-                        selected && (selected !== resourceNav) && selected.classList.remove('expand');
-                    }
+            /**
+             * Set selected navigation item and expand parents (if any)
+             * @param {element} el
+             */
+            function setSelection(el) {
+                if ($(el).hasClass('resource-nav-item')) {
+                    $('.sidebar .resource-header.expand').removeClass('expand');
+                    $(el).parent().addClass('expand');
+                } else if ($(el).hasClass('child-nav-item')) {
+                    $('.sidebar .child-nav-item.selected').removeClass('selected');
+                    $(el).addClass('selected');
+                    $(el).parents('.resource-header').addClass('expand');
+                } else if ($(el).parent().hasClass('group-header')) {
+                    $('.sidebar .resource-header.expand').removeClass('expand');
+                    $('.sidebar .child-nav-item.selected').removeClass('selected');
                 }
             }
-            var wayHandler = debounce(function() {
 
-                if (this.element.classList.contains('header-anchor')) {
-                    this.element = this.element.parentNode;
-                }
+            $(function() {
+                // Child attributes hide/show
+                $('.doc-body .show-child-attr > span').on('click', function(e) {
+                    var parent = e.target.parentNode.parentNode;
 
-                var tid = this.element.id;
-                var id = '#' + this.element.id;
-
-                var navEl = document.querySelector('.sidebar a[href=\"' + id + '\"]');
-                selectSection(navEl)
-            }, 0, true)
-            var hAnchors = document.querySelectorAll('.header-anchor');
-            var topElement = document.querySelector('.top')
-            for(var i = 0;i < waypoints.length; i++) {
-                new Waypoint({
-                    continuous: false,
-                    context: document.querySelector('.container'),
-                    element: waypoints[i],
-                    handler: wayHandler
+                    if ($(e.target).hasClass('expand') || $(e.target).hasClass('close')) {
+                        $(parent).toggleClass('show');
+                    }
                 });
-            }
-            for(var i = 0;i < hAnchors.length; i++) {
-                new Waypoint({
-                    continuous: false,
-                    context: document.querySelector('.container'),
-                    element: hAnchors[i],
-                    handler: wayHandler,
-                    offset: 20
+
+                // Slidebar click handler
+                $('.sidebar a').on('click', function(e) {
+                    setSelection(e.target);
                 });
-            }
-            new Waypoint({
-                continuous: false,
-                context: document.querySelector('.container'),
-                element: topElement,
-                handler: wayHandler,
-                offset: -10
-            });
-            function debounce(func, wait, immediate) {
-                var timeout;
-                return function() {
-                    var context = this, args = arguments;
-                    var later = function() {
-                        timeout = null;
-                        if (!immediate) func.apply(context, args);
-                    };
-                    var callNow = immediate && !timeout;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                    if (callNow) func.apply(context, args);
-                };
-            };
-            var h = window.location.hash
-            if (h) {
-                var scrollEl = document.getElementById(h.slice(1));
-                if (scrollEl) {
-                    scrollEl.scrollIntoView();
+
+                // Language bar click handler
+                $('.top-header .lang-header [data-lang]').on('click', function(e) {
+                    if ($(e.target).data('lang') === 'none') {
+                        $('.sample-request').hide();
+                    } else {
+                        $('.sample-request').show();
+                    }
+
+                    $('.top-header .lang-header [data-lang]').removeClass('selected');
+                    $(e.target).addClass('selected');
+
+                    $('.sample-request code').hide();
+                    $('.sample-request code[class~="' + $(e.target).data('lang') + '"]').show();
+
+                    localStorage.setItem('exampleLang', $(e.target).data('lang'));
+                });
+
+                // Active language on load
+                if ($('.top-header .lang-header [data-lang]')) {
+                    var lastLang = localStorage.getItem('exampleLang');
+                    var selected = $('.top-header .lang-header [data-lang="' + lastLang + '"]');
+
+                    if (!selected) {
+                        selected = $('.top-header .lang-header [data-lang]');
+                    }
+
+                    if ($(selected).data('lang') == 'none') {
+                        $('.sample-request').hide();
+                    } else {
+                        $('.sample-request').show();
+                    }
+
+                    $(selected).addClass('selected');
+                    $('.sample-request code').hide();
+                    $('.sample-request code[class~="' + $(selected).data('lang') + '"]').show();
                 }
-            }
+
+                // Location hash (fix scrolling)
+                if (window.location.hash) {
+                    var scrollEl = $(window.location.hash);
+                    if (scrollEl.length) {
+                        scrollEl[0].scrollIntoView({block: "start", behavior: "instant"});
+                    }
+
+                    setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
+                }
+
+                // Waypoints
+                $('.way-point[id]').waypoint({
+                    continuous: false,
+                    context: $('.container'),
+                    handler: function(direction) {
+                        setSelection($('.sidebar a[href=\"#' + this.element.id + '\"]'));
+                    }
+                });
+            });
         </script>
     </body>
 </html>

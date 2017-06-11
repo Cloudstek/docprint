@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "highlight.js": "isagalaev/highlight.js",
+    "jquery": "^3.2.1",
+    "waypoints": "^4.0.1"
+  }
+}

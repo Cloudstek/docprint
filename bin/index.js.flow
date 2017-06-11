@@ -7,10 +7,9 @@ import docprint from '../src';
 program
     .option('-p, --filepath <filepath>', 'Path to the blueprint file')
     .option('-d, --destination <destination>', 'Destination folder')
-    .option('-h, --header <header>', 'Custom HTML header file or contents')
-    .option('-t, --headerhtml <headerhtml>', 'Custom HTML header contents (deprecated, use header)')
+    .option('-h, --header <header>', 'Custom nunjucks/HTML header file or contents')
     .option('-c, --css <css>', 'Custom CSS file or contents')
-    .option('-t, --template <file>', 'Custom pug template file')
+    .option('-t, --template <file>', 'Custom nunjucks template file or one of the built-in templates')
     .parse(process.argv);
 
 if (!program.filepath || !program.destination || program.destination.length === 0 || program.filepath.length === 0) {
@@ -21,7 +20,7 @@ if (!program.filepath || !program.destination || program.destination.length === 
 docprint({
     filepath: program.filepath,
     destination: program.destination,
-    header: program.header || program.headerhtml,
+    header: program.header,
     css: program.css,
     template: program.template
 });

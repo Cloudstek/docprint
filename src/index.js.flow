@@ -5,6 +5,7 @@ import promisify from 'promisify-es6';
 import path from 'path';
 import nunjucks from 'nunjucks';
 
+import less from 'less';
 import _drafter from 'drafter';
 import {transcludeFile as _transcludeFile} from 'hercule';
 
@@ -20,13 +21,11 @@ export default async (options: Object = {}) => {
     // Custom header and css
     let customCss: ?string;
     let customHeader: ?string;
-    let template: string = options.template || path.join(__dirname, 'templates', 'default', 'default.njk');
-
-    let css = await fs.readFile(path.join(__dirname, 'css', 'style.css'), 'utf8');
+    options.template = options.template || path.join(__dirname, 'templates', 'default', 'default.njk');
 
     // Promisify
     const transcludeFile = promisify(_transcludeFile);
-    const drafterParse = promisify(_drafter.parse);
+    const drafter = promisify(_drafter);
 
     // Custom CSS
     if (options.css) {
@@ -49,7 +48,7 @@ export default async (options: Object = {}) => {
     // Transclude
     let result: string;
     result = await transcludeFile(options.filepath);
-    result = await drafterParse(result, {
+    result = await drafter.parse(result, {
         requireBlueprintName: true
     });
 
@@ -64,50 +63,23 @@ export default async (options: Object = {}) => {
     let dataStructures = parser.getDataStructures(output);
 
     // Nunjucks
-    let env = nunjucks.configure(path.join(__dirname, 'templates', 'default'), {
-        noCache: true
-    });
+    let env = nunjucks.configure(path.dirname(options.template));
 
-    env.addFilter('find', (obj, property, value) => {
-        if (!Array.isArray(obj)) {
-            return;
-        }
-        return obj.find(o => o[property] === value);
-    });
-
-    env.addFilter('includes', (haystack, needle, position = 0) => {
-        return haystack.includes(needle, position);
-    });
-
-    let res = await new Promise((resolve, reject) => {
-        env.render('default.njk', {
-            doc: output,
-            css: css,
-            dataStructures: dataStructures,
-            languages: parser.getLanguages()
-        }, (err, res) => {
-            if (err) {
-                console.error(err);
-                process.exit();
-            }
-
-            resolve(res);
-        });
-    });
+    // Add Nunjucks filters
+    env = addFilters(env, options);
 
     // Render
+    let res = await renderTemplate(env, path.basename(options.template), {
+        doc: output,
+        css: customCss,
+        header: customHeader,
+        dataStructures: dataStructures,
+        languages: parser.getLanguages()
+    });
+
+    // Save
     fs.ensureDirSync(options.destination);
     fs.writeFileSync(path.join(options.destination, 'index.html'), res);
-
-    /* Fs.writeFileSync(options.destination + '/index.html', pug.renderFile(template, {
-        output: output,
-        css: css,
-        headerContent: customHeader,
-        customCSS: customCss,
-        dataStructures: dataStructures,
-        capitalize: capitalize,
-        languages: parser.getLanguages()
-    })); */
 };
 
 /**
@@ -124,4 +96,61 @@ function getHost(doc: Object): ?string {
 
         return hostMeta ? stripSlash(at(hostMeta, 'content.value.content')) : null;
     }
+}
+
+async function renderTemplate(env, template, context) {
+    return new Promise((resolve, reject) => {
+        env.render(template, context, (err, res) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve(res);
+        });
+    });
+}
+
+function addFilters(env, options) {
+    // Find property in object
+    env.addFilter('find', (obj, property, value) => {
+        if (!Array.isArray(obj)) {
+            return;
+        }
+
+        return obj.find(o => o[property] === value);
+    });
+
+    // Check if array or string includes needle
+    env.addFilter('includes', (haystack, needle, position = 0) => {
+        return haystack.includes(needle, position);
+    });
+
+    // Convert LESS
+    env.addFilter('less', (code, cb) => {
+        let paths = ['.'];
+
+        if (code.endsWith('.less')) {
+            let filePath = path.resolve(path.dirname(options.template), code);
+            code = fs.readFileSync(filePath, 'utf8');
+            paths.push(path.dirname(filePath));
+        }
+
+        less.render(code, {
+            paths: paths
+        }, (err, res) => {
+            if (err) {
+                cb(err.toString());
+            }
+
+            cb(null, res.css);
+        });
+    }, true);
+
+    // Highlight URL parameters
+    env.addFilter('highlightUrl', url => {
+        return url.replace(/({.+?})/g, '<span class="hljs-keyword">$1</span>');
+    });
+
+    return env;
 }

@@ -25,10 +25,6 @@ var _markdownIt = require('markdown-it');
 
 var _markdownIt2 = _interopRequireDefault(_markdownIt);
 
-var _highlight = require('highlight.js');
-
-var _highlight2 = _interopRequireDefault(_highlight);
-
 var _util = require('./util');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -48,12 +44,6 @@ class RefractParser {
 
         this.markdownIt.use(require('markdown-it-anchor'), {
             permalink: true
-        });
-
-        _highlight2.default.configure({
-            tabReplace: '    ',
-            useBR: true,
-            languages: this.languages.map(lang => lang.hljs)
         });
     }
 

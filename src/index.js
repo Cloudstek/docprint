@@ -12,6 +12,25 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+let renderTemplate = (() => {
+    var _ref2 = (0, _asyncToGenerator3.default)(function* (env, template, context) {
+        return new _promise2.default(function (resolve, reject) {
+            env.render(template, context, function (err, res) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                resolve(res);
+            });
+        });
+    });
+
+    return function renderTemplate(_x, _x2, _x3) {
+        return _ref2.apply(this, arguments);
+    };
+})();
+
 var _fsExtra = require('fs-extra');
 
 var _fsExtra2 = _interopRequireDefault(_fsExtra);
@@ -27,6 +46,10 @@ var _path2 = _interopRequireDefault(_path);
 var _nunjucks = require('nunjucks');
 
 var _nunjucks2 = _interopRequireDefault(_nunjucks);
+
+var _less = require('less');
+
+var _less2 = _interopRequireDefault(_less);
 
 var _drafter2 = require('drafter');
 
@@ -48,12 +71,10 @@ exports.default = (() => {
 
         let customCss;
         let customHeader;
-        let template = options.template || _path2.default.join(__dirname, 'templates', 'default', 'default.njk');
-
-        let css = yield _fsExtra2.default.readFile(_path2.default.join(__dirname, 'css', 'style.css'), 'utf8');
+        options.template = options.template || _path2.default.join(__dirname, 'templates', 'default', 'default.njk');
 
         const transcludeFile = (0, _promisifyEs2.default)(_hercule.transcludeFile);
-        const drafterParse = (0, _promisifyEs2.default)(_drafter3.default.parse);
+        const drafter = (0, _promisifyEs2.default)(_drafter3.default);
 
         if (options.css) {
             if (options.css.endsWith('.css')) {
@@ -73,7 +94,7 @@ exports.default = (() => {
 
         let result;
         result = yield transcludeFile(options.filepath);
-        result = yield drafterParse(result, {
+        result = yield drafter.parse(result, {
             requireBlueprintName: true
         });
 
@@ -85,37 +106,16 @@ exports.default = (() => {
 
         let dataStructures = parser.getDataStructures(output);
 
-        let env = _nunjucks2.default.configure(_path2.default.join(__dirname, 'templates', 'default'), {
-            noCache: true
-        });
+        let env = _nunjucks2.default.configure(_path2.default.dirname(options.template));
 
-        env.addFilter('find', function (obj, property, value) {
-            if (!Array.isArray(obj)) {
-                return;
-            }
-            return obj.find(function (o) {
-                return o[property] === value;
-            });
-        });
+        env = addFilters(env, options);
 
-        env.addFilter('includes', function (haystack, needle, position = 0) {
-            return haystack.includes(needle, position);
-        });
-
-        let res = yield new _promise2.default(function (resolve, reject) {
-            env.render('default.njk', {
-                doc: output,
-                css: css,
-                dataStructures: dataStructures,
-                languages: parser.getLanguages()
-            }, function (err, res) {
-                if (err) {
-                    console.error(err);
-                    process.exit();
-                }
-
-                resolve(res);
-            });
+        let res = yield renderTemplate(env, _path2.default.basename(options.template), {
+            doc: output,
+            css: customCss,
+            header: customHeader,
+            dataStructures: dataStructures,
+            languages: parser.getLanguages()
         });
 
         _fsExtra2.default.ensureDirSync(options.destination);
@@ -136,4 +136,44 @@ function getHost(doc) {
 
         return hostMeta ? (0, _util.stripSlash)((0, _util.at)(hostMeta, 'content.value.content')) : null;
     }
+}
+
+function addFilters(env, options) {
+    env.addFilter('find', (obj, property, value) => {
+        if (!Array.isArray(obj)) {
+            return;
+        }
+
+        return obj.find(o => o[property] === value);
+    });
+
+    env.addFilter('includes', (haystack, needle, position = 0) => {
+        return haystack.includes(needle, position);
+    });
+
+    env.addFilter('less', (code, cb) => {
+        let paths = ['.'];
+
+        if (code.endsWith('.less')) {
+            let filePath = _path2.default.resolve(_path2.default.dirname(options.template), code);
+            code = _fsExtra2.default.readFileSync(filePath, 'utf8');
+            paths.push(_path2.default.dirname(filePath));
+        }
+
+        _less2.default.render(code, {
+            paths: paths
+        }, (err, res) => {
+            if (err) {
+                cb(err.toString());
+            }
+
+            cb(null, res.css);
+        });
+    }, true);
+
+    env.addFilter('highlightUrl', url => {
+        return url.replace(/({.+?})/g, '<span class="hljs-keyword">$1</span>');
+    });
+
+    return env;
 }
