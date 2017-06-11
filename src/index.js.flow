@@ -1,0 +1,127 @@
+// @flow
+
+import fs from 'fs-extra';
+import promisify from 'promisify-es6';
+import path from 'path';
+import nunjucks from 'nunjucks';
+
+import _drafter from 'drafter';
+import {transcludeFile as _transcludeFile} from 'hercule';
+
+import {RefractParser} from './parser';
+import {at, stripSlash} from './util';
+
+export default async (options: Object = {}) => {
+    // Check options
+    if (!options.filepath || options.filepath.length === 0) {
+        throw new Error('No input file given.');
+    }
+
+    // Custom header and css
+    let customCss: ?string;
+    let customHeader: ?string;
+    let template: string = options.template || path.join(__dirname, 'templates', 'default', 'default.njk');
+
+    let css = await fs.readFile(path.join(__dirname, 'css', 'style.css'), 'utf8');
+
+    // Promisify
+    const transcludeFile = promisify(_transcludeFile);
+    const drafterParse = promisify(_drafter.parse);
+
+    // Custom CSS
+    if (options.css) {
+        if (options.css.endsWith('.css')) {
+            customCss = fs.readFileSync(options.css, 'utf8');
+        } else {
+            customCss = options.css;
+        }
+    }
+
+    // Custom header
+    if (options.header) {
+        if (options.header.endsWith('.html') || options.header.endsWith('.htm')) {
+            customHeader = fs.readFileSync(options.header, 'utf8');
+        } else {
+            customHeader = options.header;
+        }
+    }
+
+    // Transclude
+    let result: string;
+    result = await transcludeFile(options.filepath);
+    result = await drafterParse(result, {
+        requireBlueprintName: true
+    });
+
+    // Parse refract output
+    let parser = new RefractParser({
+        apiUrl: getHost(result)
+    });
+
+    let output: Object = await parser.parse(result);
+
+    // Get dataStructures
+    let dataStructures = parser.getDataStructures(output);
+
+    // Nunjucks
+    let env = nunjucks.configure(path.join(__dirname, 'templates', 'default'), {
+        noCache: true
+    });
+
+    env.addFilter('find', (obj, property, value) => {
+        if (!Array.isArray(obj)) {
+            return;
+        }
+        return obj.find(o => o[property] === value);
+    });
+
+    env.addFilter('includes', (haystack, needle, position = 0) => {
+        return haystack.includes(needle, position);
+    });
+
+    let res = await new Promise((resolve, reject) => {
+        env.render('default.njk', {
+            doc: output,
+            css: css,
+            dataStructures: dataStructures,
+            languages: parser.getLanguages()
+        }, (err, res) => {
+            if (err) {
+                console.error(err);
+                process.exit();
+            }
+
+            resolve(res);
+        });
+    });
+
+    // Render
+    fs.ensureDirSync(options.destination);
+    fs.writeFileSync(path.join(options.destination, 'index.html'), res);
+
+    /* Fs.writeFileSync(options.destination + '/index.html', pug.renderFile(template, {
+        output: output,
+        css: css,
+        headerContent: customHeader,
+        customCSS: customCss,
+        dataStructures: dataStructures,
+        capitalize: capitalize,
+        languages: parser.getLanguages()
+    })); */
+};
+
+/**
+ * Get API host from meta
+ * @param {Object} doc Refract object
+ * @return {string|null}
+ */
+function getHost(doc: Object): ?string {
+    let metas = at(doc, 'content.0.attributes.meta');
+    if (metas && metas.find) {
+        let hostMeta = metas.find(meta => {
+            return at(meta, 'content.key.content') === 'HOST';
+        });
+
+        return hostMeta ? stripSlash(at(hostMeta, 'content.value.content')) : null;
+    }
+}

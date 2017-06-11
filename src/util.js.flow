@@ -1,14 +1,14 @@
 // @flow
 
-function sanitize(input: Array<any>) {
+export function sanitize(input: Array<any>) {
     return input.filter(a => a);
 }
 
-function capitalize(str: ?string) {
+export function capitalize(str: ?string) {
     return str && str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function at(o: ?Object, path: ?string, def: ?any): any {
+export function at(o: ?Object, path: ?string, def: ?any): any {
     if (!o || !path) {
         return o;
     }
@@ -27,7 +27,7 @@ function at(o: ?Object, path: ?string, def: ?any): any {
     return failed ? (o[path] || def) : pointer;
 }
 
-function stripSlash(str: ?string) {
+export function stripSlash(str: ?string) {
     if (str && str.endsWith('/')) {
         return str.substr(0, str.length - 1);
     }
@@ -35,7 +35,7 @@ function stripSlash(str: ?string) {
     return str;
 }
 
-function slugify(str: string) {
+export function slugify(str: string) {
     return str && str.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')
@@ -43,11 +43,3 @@ function slugify(str: string) {
         .replace(/^-+/, '')
         .replace(/-+$/, '');
 }
-
-module.exports = {
-    slugify: slugify,
-    capitalize: capitalize,
-    at: at,
-    stripSlash: stripSlash,
-    sanitize: sanitize
-};

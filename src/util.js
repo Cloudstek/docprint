@@ -1,8 +1,18 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
 var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+exports.sanitize = sanitize;
+exports.capitalize = capitalize;
+exports.at = at;
+exports.stripSlash = stripSlash;
+exports.slugify = slugify;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -65,11 +75,3 @@ function stripSlash(str) {
 function slugify(str) {
     return str && str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
 }
-
-module.exports = {
-    slugify: slugify,
-    capitalize: capitalize,
-    at: at,
-    stripSlash: stripSlash,
-    sanitize: sanitize
-};

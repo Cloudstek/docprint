@@ -2,7 +2,7 @@
   "name": "docprint",
   "version": "1.9.0",
   "description": "Generates documentation from api-blueprint files",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -26,13 +26,11 @@
     "es6-promisify": "^5.0.0",
     "fs-extra": "^3.0.1",
     "hercule": "^4.0.1",
-    "highlight.js": "^9.12.0",
     "httpsnippet": "1.16.5",
     "markdown-it": "^8.3.1",
     "markdown-it-anchor": "^4.0.0",
-    "markdown-it-highlightjs": "^3.0.0",
-    "mkdirp": "0.5.1",
-    "pug": "^2.0.0-beta4"
+    "nunjucks": "^3.0.1",
+    "promisify-es6": "^1.0.2"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
@@ -50,7 +48,6 @@
     "flow-bin": "^0.47.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
-    "gulp-environments": "^0.1.2",
     "gulp-eslint": "^3.0.1",
     "gulp-rename": "^1.2.2"
   }

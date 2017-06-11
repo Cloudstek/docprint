@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+// @flow
+
+import program from 'commander';
+import docprint from '../src';
+
+program
+    .option('-p, --filepath <filepath>', 'Path to the blueprint file')
+    .option('-d, --destination <destination>', 'Destination folder')
+    .option('-h, --header <header>', 'Custom HTML header file or contents')
+    .option('-t, --headerhtml <headerhtml>', 'Custom HTML header contents (deprecated, use header)')
+    .option('-c, --css <css>', 'Custom CSS file or contents')
+    .option('-t, --template <file>', 'Custom pug template file')
+    .parse(process.argv);
+
+if (!program.filepath || !program.destination || program.destination.length === 0 || program.filepath.length === 0) {
+    program.help();
+    process.exit();
+}
+
+docprint({
+    filepath: program.filepath,
+    destination: program.destination,
+    header: program.header || program.headerhtml,
+    css: program.css,
+    template: program.template
+});

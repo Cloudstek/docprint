@@ -5,5 +5,5 @@ gulp.task('default', ['build']);
 gulp.task('build', ['babel', 'eslint']);
 
 gulp.task('watch', ['babel', 'eslint', 'build'], done => {
-    gulp.watch(['./src/**/*.js.flow', '!node_modules', '!node_modules/**'], ['babel']);
+    gulp.watch(['./**/*.js.flow', '!node_modules', '!node_modules/**'], ['babel']);
 });

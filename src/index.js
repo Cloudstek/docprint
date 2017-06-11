@@ -1,84 +1,139 @@
-require('./patch');
+'use strict';
 
-var drafter = require('drafter');
-var hercule = require('hercule');
-var fs = require('fs');
-var pug = require('pug');
-var parse = require('./parse');
-var mkdir = require('mkdirp');
-var util = require('./util');
-var host = require('./host');
-var path = require('path');
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 
-var slugify = util.slugify;
-var at = util.at;
-var capitalize = util.capitalize;
-var stripSlash = util.stripSlash;
+var _promise = require('babel-runtime/core-js/promise');
 
-module.exports = function(options) {
-	options = options || {};
-	var filePath = stripSlash(options.filepath),
-		destFolder = stripSlash(options.destination || filePath),
-		header = options.header,
-		headerhtml = options.headerhtml,
-		cssFile = options.css,
-		customCSS;
+var _promise2 = _interopRequireDefault(_promise);
 
-	if (cssFile) {
-		customCSS = fs.readFileSync(cssFile).toString();
-	}
-	if(header) {
-		headerhtml = fs.readFileSync(header).toString();
-	}
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
-	try {
-		var relativePath = path.resolve(filePath);
-		relativePath = relativePath.substring(0, relativePath.lastIndexOf('/'));
-	  	var result = drafter.parseSync(
-	  		hercule.transcludeStringSync(fs.readFileSync(filePath).toString(), {
-	  			relativePath: relativePath
-	  		}), {
-	  		requireBlueprintName: true
-	  	});
-	  	setHost(result);
-	  	var output = {};
-	  	parse(result, output);
-	  	
-	  	destFolder = path.resolve(destFolder);
-		var dataStructures = at(output, 'content.0.content');
-		dataStructures = dataStructures && dataStructures.find(function(c){ return c.type === 'dataStructures'; } ) || [];
-		dataStructures = dataStructures && dataStructures.content;
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
-		var css = fs.readFileSync(__dirname + '/css/style.css').toString();
-		var langs = ['curl', 'node', 'python', 'java', 'ruby', 'php', 'go'];
+var _fsExtra = require('fs-extra');
 
-		langs.forEach(function(l) {
-			mkdir.sync(destFolder + '/' + l);
-			require('fs').writeFileSync(destFolder + '/' + l +  '/index.html', 
-				pug.renderFile(__dirname + '/jade/index.pug', { 
-					output : output, 
-					css: css, 
-					headerContent: headerhtml,
-					customCSS: customCSS,
-					dataStructures: dataStructures, 
-					capitalize: capitalize, 
-					lang: l
-			}));
-		});
-	} catch (err) {
-	  console.log(err, err.stack);
-	}
+var _fsExtra2 = _interopRequireDefault(_fsExtra);
 
+var _promisifyEs = require('promisify-es6');
+
+var _promisifyEs2 = _interopRequireDefault(_promisifyEs);
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
+var _nunjucks = require('nunjucks');
+
+var _nunjucks2 = _interopRequireDefault(_nunjucks);
+
+var _drafter2 = require('drafter');
+
+var _drafter3 = _interopRequireDefault(_drafter2);
+
+var _hercule = require('hercule');
+
+var _parser = require('./parser');
+
+var _util = require('./util');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = (() => {
+    var _ref = (0, _asyncToGenerator3.default)(function* (options = {}) {
+        if (!options.filepath || options.filepath.length === 0) {
+            throw new Error('No input file given.');
+        }
+
+        let customCss;
+        let customHeader;
+        let template = options.template || _path2.default.join(__dirname, 'templates', 'default', 'default.njk');
+
+        let css = yield _fsExtra2.default.readFile(_path2.default.join(__dirname, 'css', 'style.css'), 'utf8');
+
+        const transcludeFile = (0, _promisifyEs2.default)(_hercule.transcludeFile);
+        const drafterParse = (0, _promisifyEs2.default)(_drafter3.default.parse);
+
+        if (options.css) {
+            if (options.css.endsWith('.css')) {
+                customCss = _fsExtra2.default.readFileSync(options.css, 'utf8');
+            } else {
+                customCss = options.css;
+            }
+        }
+
+        if (options.header) {
+            if (options.header.endsWith('.html') || options.header.endsWith('.htm')) {
+                customHeader = _fsExtra2.default.readFileSync(options.header, 'utf8');
+            } else {
+                customHeader = options.header;
+            }
+        }
+
+        let result;
+        result = yield transcludeFile(options.filepath);
+        result = yield drafterParse(result, {
+            requireBlueprintName: true
+        });
+
+        let parser = new _parser.RefractParser({
+            apiUrl: getHost(result)
+        });
+
+        let output = yield parser.parse(result);
+
+        let dataStructures = parser.getDataStructures(output);
+
+        let env = _nunjucks2.default.configure(_path2.default.join(__dirname, 'templates', 'default'), {
+            noCache: true
+        });
+
+        env.addFilter('find', function (obj, property, value) {
+            if (!Array.isArray(obj)) {
+                return;
+            }
+            return obj.find(function (o) {
+                return o[property] === value;
+            });
+        });
+
+        env.addFilter('includes', function (haystack, needle, position = 0) {
+            return haystack.includes(needle, position);
+        });
+
+        let res = yield new _promise2.default(function (resolve, reject) {
+            env.render('default.njk', {
+                doc: output,
+                css: css,
+                dataStructures: dataStructures,
+                languages: parser.getLanguages()
+            }, function (err, res) {
+                if (err) {
+                    console.error(err);
+                    process.exit();
+                }
+
+                resolve(res);
+            });
+        });
+
+        _fsExtra2.default.ensureDirSync(options.destination);
+        _fsExtra2.default.writeFileSync(_path2.default.join(options.destination, 'index.html'), res);
+    });
+
+    return function () {
+        return _ref.apply(this, arguments);
+    };
+})();
+
+function getHost(doc) {
+    let metas = (0, _util.at)(doc, 'content.0.attributes.meta');
+    if (metas && metas.find) {
+        let hostMeta = metas.find(meta => {
+            return (0, _util.at)(meta, 'content.key.content') === 'HOST';
+        });
+
+        return hostMeta ? (0, _util.stripSlash)((0, _util.at)(hostMeta, 'content.value.content')) : null;
+    }
 }
-
-function setHost(result) {
-	var metas = at(result, 'content.0.attributes.meta');
-	if (metas && metas.find) {
-		var hostMeta = metas.find(function(m) {
-			return at(m, 'content.key.content') === 'HOST';
-		});
-        
-		hostMeta && host.set(stripSlash(at(hostMeta, 'content.value.content')) || 'http://{host}');
-	}
-}
-

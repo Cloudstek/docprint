@@ -39,6 +39,10 @@ mark {
     color: yellow;
 }
 
+pre {
+	margin: 0;
+}
+
 .top-element {
 	height: 0px;
 	width: 100%;
@@ -118,7 +122,7 @@ mark {
 	padding-top: 45px;
 	background: #fafafa;
 }
- 
+
 .sidebar .group-header {
 	color: rgb(82, 98, 105);
 	font-weight: 600;
@@ -242,7 +246,7 @@ ul.attrs, ul.params {
 
 .params .left, .attrs .left, .params .right, .attrs .right {
     display: inline-block;
-    width: 50%;
+    width: 49.5%;
     vertical-align: top;
 }
 
@@ -268,7 +272,7 @@ li.param, li.attr {
 }
 
 li.param:last-child, li.attr:last-child {
-	border-bottom: none;	
+	border-bottom: none;
 }
 
 .left {
@@ -394,19 +398,6 @@ li.param:last-child, li.attr:last-child {
 }
 
 .hljs {
-    border-radius: 2px;
-    margin: 0;
-    white-space: pre-wrap;
-}
-
-.hljs-keyword {
-	font-weight: 600;
-}
-
-.hljs-built_in {
-	color: #0095dd;
-}
-
-.hljs-attr {
-	color: #4aba09;
+    /* white-space: pre-wrap;*/
+	background: none!important;
 }

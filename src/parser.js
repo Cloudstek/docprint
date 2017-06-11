@@ -1,5 +1,10 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.RefractParser = undefined;
+
 var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
@@ -8,22 +13,34 @@ var _assign = require('babel-runtime/core-js/object/assign');
 
 var _assign2 = _interopRequireDefault(_assign);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _httpsnippet = require('httpsnippet');
 
-const HTTPSnippet = require('httpsnippet');
-const cheerio = require('cheerio');
-const markdownIt = require('markdown-it');
-const hljs = require('highlight.js');
-const util = require('./util');
+var _httpsnippet2 = _interopRequireDefault(_httpsnippet);
+
+var _cheerio = require('cheerio');
+
+var _cheerio2 = _interopRequireDefault(_cheerio);
+
+var _markdownIt = require('markdown-it');
+
+var _markdownIt2 = _interopRequireDefault(_markdownIt);
+
+var _highlight = require('highlight.js');
+
+var _highlight2 = _interopRequireDefault(_highlight);
+
+var _util = require('./util');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class RefractParser {
 
-    constructor(options) {
+    constructor(options = {}) {
         this.languages = [{ name: 'curl', displayName: 'cURL', snippet: { target: 'shell', client: 'curl' }, hljs: 'bash' }, { name: 'node', displayName: 'NodeJS', snippet: { target: 'node', client: 'request' }, hljs: 'javascript' }, { name: 'python', displayName: 'Python', snippet: { target: 'python', client: 'python3' }, hljs: 'python' }, { name: 'java', displayName: 'Java', snippet: { target: 'java', client: 'okhttp' }, hljs: 'java' }, { name: 'ruby', displayName: 'Ruby', snippet: { target: 'ruby', client: 'native' }, hljs: 'ruby' }, { name: 'php', displayName: 'PHP', snippet: { target: 'php', client: 'ext-curl' }, hljs: 'php' }, { name: 'go', displayName: 'Go', snippet: { target: 'go', client: 'native' }, hljs: 'go' }];
 
         this.options = (0, _assign2.default)({}, this.options, options);
 
-        this.markdownIt = markdownIt({
+        this.markdownIt = (0, _markdownIt2.default)({
             html: true,
             linkify: true,
             typographer: true
@@ -33,7 +50,7 @@ class RefractParser {
             permalink: true
         });
 
-        hljs.configure({
+        _highlight2.default.configure({
             tabReplace: '    ',
             useBR: true,
             languages: this.languages.map(lang => lang.hljs)
@@ -41,38 +58,113 @@ class RefractParser {
     }
 
     parse(doc) {
-        if (!doc.element === 'parseResult') {
-            return;
+        if (!doc.element && !doc.element === 'parseResult') {
+            throw new Error('Input is not a valid refract object.');
         }
 
         return {
             type: 'result',
-            content: util.sanitize(doc.content.map(content => {
+            content: (0, _util.sanitize)(doc.content.map(content => {
                 return this._parse(content, {}, { type: 'result' }).current;
             }))
         };
     }
 
+    getDataStructures(doc) {
+        if (!doc.type && !doc.type === 'result') {
+            throw new Error('Input is not a valid RefractParser result object.');
+        }
+
+        let ds = (0, _util.at)(doc, 'content.0.content');
+
+        ds = ds && ds.find(el => el.type === 'dataStructures');
+        return ds && ds.content || [];
+    }
+
+    getLanguages() {
+        return this.languages;
+    }
+
     _parse(doc, current = {}, parent = {}) {
-        switch (doc.element) {
-            case 'copy':
-                var _parseCopy = this._parseCopy(doc, current, parent);
+        try {
+            switch (doc.element) {
+                case 'copy':
+                    var _parseCopy = this._parseCopy(doc, current, parent);
 
-                doc = _parseCopy.doc;
-                current = _parseCopy.current;
-                parent = _parseCopy.parent;
+                    doc = _parseCopy.doc;
+                    current = _parseCopy.current;
+                    parent = _parseCopy.parent;
 
-                break;
-            case 'category':
-                var _parseCategory = this._parseCategory(doc, current, parent);
+                    break;
+                case 'category':
+                    var _parseCategory = this._parseCategory(doc, current, parent);
 
-                doc = _parseCategory.doc;
-                current = _parseCategory.current;
-                parent = _parseCategory.parent;
+                    doc = _parseCategory.doc;
+                    current = _parseCategory.current;
+                    parent = _parseCategory.parent;
 
-                break;
-            default:
-                break;
+                    break;
+                case 'resource':
+                    var _parseResource = this._parseResource(doc, current, parent);
+
+                    doc = _parseResource.doc;
+                    current = _parseResource.current;
+                    parent = _parseResource.parent;
+
+                    break;
+                case 'transition':
+                    var _parseTransition = this._parseTransition(doc, current, parent);
+
+                    doc = _parseTransition.doc;
+                    current = _parseTransition.current;
+                    parent = _parseTransition.parent;
+
+                    break;
+                case 'dataStructure':
+                    var _parseDataStructure = this._parseDataStructure(doc, current, parent);
+
+                    doc = _parseDataStructure.doc;
+                    current = _parseDataStructure.current;
+                    parent = _parseDataStructure.parent;
+
+                    break;
+                case 'httpTransaction':
+                    var _parseHttpTransaction = this._parseHttpTransaction(doc, current, parent);
+
+                    doc = _parseHttpTransaction.doc;
+                    current = _parseHttpTransaction.current;
+                    parent = _parseHttpTransaction.parent;
+
+                    break;
+                case 'httpRequest':
+                    var _parseHttpRequest = this._parseHttpRequest(doc, current, parent);
+
+                    doc = _parseHttpRequest.doc;
+                    current = _parseHttpRequest.current;
+                    parent = _parseHttpRequest.parent;
+
+                    break;
+                case 'httpResponse':
+                    var _parseHttpResponse = this._parseHttpResponse(doc, current, parent);
+
+                    doc = _parseHttpResponse.doc;
+                    current = _parseHttpResponse.current;
+                    parent = _parseHttpResponse.parent;
+
+                    break;
+                case 'asset':
+                    var _parseAsset = this._parseAsset(doc, current, parent);
+
+                    doc = _parseAsset.doc;
+                    current = _parseAsset.current;
+                    parent = _parseAsset.parent;
+
+                    break;
+                default:
+                    break;
+            }
+        } catch (err) {
+            console.error(err);
         }
 
         return {
@@ -84,7 +176,7 @@ class RefractParser {
 
     _parseCopy(doc, current, parent) {
         let description = this.markdownIt.render(doc.content);
-        let $ = cheerio.load(description);
+        let $ = _cheerio2.default.load(description);
 
         parent.description = {
             text: description,
@@ -114,9 +206,9 @@ class RefractParser {
                 };
             });
         } else {
-            current.id = 'group-' + util.slugify(meta.title || parent.title);
+            current.id = 'group-' + (0, _util.slugify)(meta.title || parent.title);
             current.title = meta.title;
-            current.content = util.sanitize(doc.content.map(content => {
+            current.content = (0, _util.sanitize)(doc.content.map(content => {
                 return this._parse(content, {}, current).current;
             }));
         }
@@ -133,9 +225,9 @@ class RefractParser {
 
         current.type = 'resource';
         current.title = meta.title;
-        current.id = 'resource-' + util.slugify(meta.title);
+        current.id = 'resource-' + (0, _util.slugify)(meta.title);
         current.props = this._getProps(doc.attributes);
-        current.content = util.sanitize(doc.content.map(content => {
+        current.content = (0, _util.sanitize)(doc.content.map(content => {
             return this._parse(content, {}, current).current;
         }));
 
@@ -152,14 +244,14 @@ class RefractParser {
         current.type = 'transition';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = util.sanitize(doc.content.map(content => {
+        current.content = (0, _util.sanitize)(doc.content.map(content => {
             return this._parse(content, {}, current).current;
         }));
 
-        let method = util.at(current, 'content.0.content.0.props.method');
-        current.id = 'transition-' + util.slugify(meta.title + '-' + method);
+        let method = (0, _util.at)(current, 'content.0.content.0.props.method');
+        current.id = 'transition-' + (0, _util.slugify)(meta.title + '-' + method);
         current.xhrContent = this._xhrContent(current, parent);
-        current.snippets = [];
+        current.snippets = {};
 
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
@@ -169,10 +261,7 @@ class RefractParser {
             for (var _iterator = (0, _getIterator3.default)(this.languages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 let lang = _step.value;
 
-                current.snippets[lang.name] = {
-                    content: unescape(new HTTPSnippet(current.xhrContent).convert(lang.snippet.target, lang.snippet.type)),
-                    hljs: lang.hljs
-                };
+                current.snippets[lang.name] = unescape(new _httpsnippet2.default(current.xhrContent).convert(lang.snippet.target, lang.snippet.type));
             }
         } catch (err) {
             _didIteratorError = true;
@@ -200,10 +289,10 @@ class RefractParser {
         current.type = 'dataStructure';
         current.content = doc.content;
 
-        let trId = util.capitalize(current.content[0] && current.content[0].meta && current.content[0].meta.id);
+        let trId = (0, _util.capitalize)(current.content[0] && current.content[0].meta && current.content[0].meta.id);
 
         if (trId) {
-            current.id = 'object-' + util.slugify(trId);
+            current.id = 'object-' + (0, _util.slugify)(trId);
             current.title = trId + ' Object';
         }
 
@@ -220,7 +309,7 @@ class RefractParser {
         current.type = 'httpTransaction';
         current.title = meta.title;
         current.props = {};
-        current.content = util.sanitize(doc.content.map(content => {
+        current.content = (0, _util.sanitize)(doc.content.map(content => {
             return this._parse(content, {}, current).current;
         }));
 
@@ -237,7 +326,7 @@ class RefractParser {
         current.type = 'httpRequest';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = util.sanitize(doc.content.map(content => {
+        current.content = (0, _util.sanitize)(doc.content.map(content => {
             return this._parse(content, {}, current).current;
         }));
 
@@ -254,7 +343,7 @@ class RefractParser {
         current.type = 'httpResponse';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = util.sanitize(doc.content.map(content => {
+        current.content = (0, _util.sanitize)(doc.content.map(content => {
             return this._parse(content, {}, current).current;
         }));
 
@@ -375,7 +464,7 @@ class RefractParser {
     }
 
     _xhrContent(transition, resource) {
-        let httpRequest = util.at(transition, 'content.0.content.0');
+        let httpRequest = (0, _util.at)(transition, 'content.0.content.0');
 
         let requestProps = httpRequest && httpRequest.props;
         requestProps = requestProps || {};
@@ -383,7 +472,8 @@ class RefractParser {
         let transProps = transition.props || {};
 
         let urlParameters = (0, _assign2.default)(transProps.urlParameters, requestProps.urlParameters);
-        let postData = httpRequest.content.find(c => c.type === 'body');
+
+        let postData = httpRequest.content && httpRequest.content.find(c => c.type === 'body');
 
         let mimeType = requestProps.headers.find(c => c.type === 'Content-Type') || 'application/json';
 
@@ -457,7 +547,7 @@ class RefractParser {
             urlParameters: urlParameters,
             postData: {
                 mimeType: mimeType,
-                postData: postData.content
+                postData: postData && postData.content
             },
             headersSize: -1,
             bodySize: -1,
@@ -465,5 +555,4 @@ class RefractParser {
         };
     }
 }
-
-module.exports = RefractParser;
+exports.RefractParser = RefractParser;

@@ -1,0 +1,132 @@
+{# Render URL parameters #}
+{% macro renderUrlParameters(parameters) %}
+    {% if parameters.length %}
+        <ul class="params">
+            {% for parameter in parameters %}
+                <li class="param">
+                    <div class="left">
+                        {% if parameter.key.content %}
+                            <div>
+                                <span class="key">{{ parameter.key.content }}</span>
+                            </div>
+                        {% endif %}
+                        {% if parameter.value.element %}
+                            <div>
+                                <span class="type">{{ parameter.value.element }}</span>
+                            </div>
+                        {% endif %}
+                        {% if parameter.value.content %}
+                            <div>
+                                <span class="example">Example: {{ parameter.value.content }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="right">
+                        {% if parameter.description %}
+                            <span class="description">{{ parameter.description | safe }}</span>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{# Render attributes #}
+{% macro renderAttributes(attributes, dataStructures) %}
+    {% if attributes.element === 'object' and attributes.content %}
+    {# Object #}
+        <ul class="attrs">
+            {% for attribute in attributes.content %}
+                {% if attribute.content %}
+                    {% set attContent = attribute.content %}
+                    <li class="attr">
+                        {# Left #}
+                        <div class="left">
+                            <div>
+                                {# Attribute name #}
+                                <span class="key">{{ attContent.key.content }}</span>
+                            </div>
+                            <div>
+                                {# Attribute type #}
+                                {% if attContent.value.element %}
+                                    <span class="type">{{ attContent.value.element }}</span>
+                                {% endif %}
+
+                                {# Required / Optional #}
+                                
+                                {% if attribute.attributes.typeAttributes and attribute.attributes.typeAttributes | includes('required') %}
+                                    <span class="required">Required</span>
+                                {% elif attribute.attributes.typeAttributes and attribute.attributes.typeAttributes | includes('optional') %}
+                                    <span class="optional">Optional</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {# Default value #}
+                                {% if attContent.attributes.default %}
+                                    <span class="default">Default value is {{ attContent.attributes.default }}</span>
+                                {% endif %}
+
+                                {# Example #}
+                                {% if attContent.value.content and attContent.value.element !== 'object' %} {# TODO: !== object, also filter by number, bool etc. see child atts #}
+                                    <span class="example">Example: {{ attContent.value.content }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {# Right #}
+                        <div class="right">
+                            {% if attribute.meta.description %}
+                                <span class="description">{{ attribute.meta.description }}</span>
+                            {% endif %}
+                        </div>
+
+                        {# Child attributes #}
+                        {% if attContent.value %}
+                            {% if attContent.value.element === 'object' %}
+                            {# Object #}
+                                <div class="child-attr">
+                                    <div class="show-child-attr left">
+                                        {% if attContent.key.content %}
+                                            <span class="expand">Expand attributes</span>
+                                            <span class="close">Close attributes</span>
+                                        {% else %}
+                                            <span class="expand">Expand properties</span>
+                                            <span class="close">Close properties</span>
+                                        {% endif %}
+                                    </div>
+
+                                    {{ renderAttributes(attContent.value, dataStructures) }}
+                                </div>
+                            {% else %}
+                            {# Data structure #}
+                                {% set selectedDs = dataStructures | find('id', attContent.value.element) %}
+                                {% if selectedDs.content %}
+                                    <div class="child-attr">
+                                        <div class="show-child-attr left">
+                                            {% if attContent.key.content %}
+                                                <span class="expand">Expand attributes</span>
+                                                <span class="close">Close attributes</span>
+                                            {% else %}
+                                                <span class="expand">Expand properties</span>
+                                                <span class="close">Close properties</span>
+                                            {% endif %}
+                                        </div>
+
+                                        {{ renderAttributes(selectedDs.content, dataStructures) }}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% else %}
+    {# Not an object, probably a data structure #}
+        {% set selectedDs = dataStructures | find('id', attContent.value.element) %}
+        {% if selectedDs.content %}
+            {{ renderAttributes(selectedDs.content, dataStructures) }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
