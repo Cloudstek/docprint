@@ -54,9 +54,7 @@ class RefractParser {
 
         return {
             type: 'result',
-            content: (0, _util.sanitize)(doc.content.map(content => {
-                return this._parse(content, {}, { type: 'result' }).current;
-            }))
+            content: doc.content && doc.content.length > 0 && this._parse(doc.content[0], {}, { type: 'result' }).current
         };
     }
 
@@ -234,36 +232,40 @@ class RefractParser {
         current.type = 'transition';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = (0, _util.sanitize)(doc.content.map(content => {
-            return this._parse(content, {}, current).current;
-        }));
+        current.transaction = doc.content.find(el => {
+            return el && el.element && el.element === 'httpTransaction';
+        }) || null;
 
-        let method = (0, _util.at)(current, 'content.0.content.0.props.method');
+        current.transaction = current.transaction && this._parse(current.transaction, {}, current).current;
+
+        let method = (0, _util.at)(current, 'transaction.content.0.props.method');
         current.id = 'transition-' + (0, _util.slugify)(meta.title + '-' + method);
         current.xhrContent = this._xhrContent(current, parent);
         current.snippets = {};
 
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+        if (current.xhrContent) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
-        try {
-            for (var _iterator = (0, _getIterator3.default)(this.languages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                let lang = _step.value;
-
-                current.snippets[lang.name] = unescape(new _httpsnippet2.default(current.xhrContent).convert(lang.snippet.target, lang.snippet.type));
-            }
-        } catch (err) {
-            _didIteratorError = true;
-            _iteratorError = err;
-        } finally {
             try {
-                if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
+                for (var _iterator = (0, _getIterator3.default)(this.languages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    let lang = _step.value;
+
+                    current.snippets[lang.name] = unescape(new _httpsnippet2.default(current.xhrContent).convert(lang.snippet.target, lang.snippet.type));
                 }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
             } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError;
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
                 }
             }
         }
@@ -299,9 +301,20 @@ class RefractParser {
         current.type = 'httpTransaction';
         current.title = meta.title;
         current.props = {};
-        current.content = (0, _util.sanitize)(doc.content.map(content => {
-            return this._parse(content, {}, current).current;
-        }));
+
+        current.request = doc.content.find(el => {
+            return el.element && el.element === 'httpRequest';
+        }) || null;
+
+        current.request = current.request && this._parse(current.request, {}, current).current;
+
+        current.responses = doc.content.filter(el => {
+            return el && el.element && el.element === 'httpResponse';
+        }) || [];
+
+        current.responses = current.responses.map(response => {
+            return this._parse(response, {}, current).current;
+        });
 
         return {
             doc: doc,
@@ -316,9 +329,16 @@ class RefractParser {
         current.type = 'httpRequest';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = (0, _util.sanitize)(doc.content.map(content => {
+
+        let content = (0, _util.sanitize)(doc.content.map(content => {
             return this._parse(content, {}, current).current;
         }));
+
+        current.body = content.find(el => {
+            return el.type && el.type === 'body';
+        });
+
+        current.body = current.body && current.body.content;
 
         return {
             doc: doc,
@@ -333,9 +353,16 @@ class RefractParser {
         current.type = 'httpResponse';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = (0, _util.sanitize)(doc.content.map(content => {
+
+        let content = (0, _util.sanitize)(doc.content.map(content => {
             return this._parse(content, {}, current).current;
         }));
+
+        current.body = content.find(el => {
+            return el.type && el.type === 'body';
+        });
+
+        current.body = current.body && current.body.content;
 
         return {
             doc: doc,
@@ -454,7 +481,7 @@ class RefractParser {
     }
 
     _xhrContent(transition, resource) {
-        let httpRequest = (0, _util.at)(transition, 'content.0.content.0');
+        let httpRequest = transition.transaction.request;
 
         let requestProps = httpRequest && httpRequest.props;
         requestProps = requestProps || {};

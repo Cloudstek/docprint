@@ -44,11 +44,7 @@ export class RefractParser {
 
         return {
             type: 'result',
-            content: sanitize(
-                doc.content.map(content => {
-                    return this._parse(content, {}, {type: 'result'}).current;
-                })
-            )
+            content: doc.content && doc.content.length > 0 && this._parse(doc.content[0], {}, {type: 'result'}).current
         };
     }
 
@@ -185,19 +181,21 @@ export class RefractParser {
         current.type = 'transition';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = sanitize(
-            doc.content.map(content => {
-                return this._parse(content, {}, current).current;
-            })
-        );
+        current.transaction = doc.content.find(el => {
+            return el && el.element && el.element === 'httpTransaction';
+        }) || null;
 
-        let method = at(current, 'content.0.content.0.props.method');
+        current.transaction = current.transaction && this._parse(current.transaction, {}, current).current;
+
+        let method = at(current, 'transaction.content.0.props.method');
         current.id = 'transition-' + slugify(meta.title + '-' + method);
         current.xhrContent = this._xhrContent(current, parent);
         current.snippets = {};
 
-        for (let lang of this.languages) {
-            current.snippets[lang.name] = unescape((new HTTPSnippet(current.xhrContent)).convert(lang.snippet.target, lang.snippet.type));
+        if (current.xhrContent) {
+            for (let lang of this.languages) {
+                current.snippets[lang.name] = unescape((new HTTPSnippet(current.xhrContent)).convert(lang.snippet.target, lang.snippet.type));
+            }
         }
 
         return {
@@ -231,11 +229,22 @@ export class RefractParser {
         current.type = 'httpTransaction';
         current.title = meta.title;
         current.props = {};
-        current.content = sanitize(
-            doc.content.map(content => {
-                return this._parse(content, {}, current).current;
-            })
-        );
+
+        // Request
+        current.request = doc.content.find(el => {
+            return el.element && el.element === 'httpRequest';
+        }) || null;
+
+        current.request = current.request && this._parse(current.request, {}, current).current;
+
+        // Responses
+        current.responses = doc.content.filter(el => {
+            return el && el.element && el.element === 'httpResponse';
+        }) || [];
+
+        current.responses = current.responses.map(response => {
+            return this._parse(response, {}, current).current;
+        });
 
         return {
             doc: doc,
@@ -250,11 +259,19 @@ export class RefractParser {
         current.type = 'httpRequest';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = sanitize(
+
+        // Request body
+        let content = sanitize(
             doc.content.map(content => {
                 return this._parse(content, {}, current).current;
             })
         );
+
+        current.body = content.find(el => {
+            return el.type && el.type === 'body';
+        });
+
+        current.body = current.body && current.body.content;
 
         return {
             doc: doc,
@@ -269,11 +286,19 @@ export class RefractParser {
         current.type = 'httpResponse';
         current.title = meta.title;
         current.props = this._getProps(doc.attributes);
-        current.content = sanitize(
+
+        // Response body
+        let content = sanitize(
             doc.content.map(content => {
                 return this._parse(content, {}, current).current;
             })
         );
+
+        current.body = content.find(el => {
+            return el.type && el.type === 'body';
+        });
+
+        current.body = current.body && current.body.content;
 
         return {
             doc: doc,
@@ -350,7 +375,7 @@ export class RefractParser {
     }
 
     _xhrContent(transition: Object, resource: Object) {
-        let httpRequest: Object = at(transition, 'content.0.content.0');
+        let httpRequest: Object = transition.transaction.request;
 
         let requestProps: Object = httpRequest && httpRequest.props;
         requestProps = requestProps || {};

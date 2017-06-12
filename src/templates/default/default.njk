@@ -5,7 +5,7 @@
     <head>
         <meta charset="utf-8">
 
-        <title>{{ doc.content[0].title | capitalize }} API</title>
+        <title>{{ title | capitalize }} API</title>
 
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Source+Code+Pro" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css" integrity="sha256-akwTLZec/XAFvgYgVH1T5/369lhA2Efr22xzCNl1nHs=" crossorigin="anonymous" />
@@ -22,7 +22,7 @@
             {{ header | safe }}
         {% else %}
             <header>
-                <h1>{{ doc.content[0].title | capitalize }} <span>API</span></h1>
+                <h1>{{ title | capitalize }} <span>API</span></h1>
             </header>
         {% endif %}
 
@@ -35,9 +35,6 @@
                         {% endfor %}
                         <li data-lang="none">None</li>
                     </ul>
-                    {#{% for lang in languages %}
-                        <span class="lan" data-lang="{{ lang.hljs }}">{{ lang.displayName }}</span>
-                    {% endfor %}#}
                 </div>
             </div>
 
@@ -49,7 +46,7 @@
                     </div>
 
                     {# Navigation #}
-                    {% for group in doc.content[0].content %}
+                    {% for group in groups %}
                         {% if group.title %}
                             <div class="group-header">
                                 <a href="#{{ group.id }}">{{ group.title }}</a>
@@ -82,24 +79,26 @@
                     {# Overview #}
                     <div class="row">
                         <div class="col-6 lhs">
-                            <div class="group-heading top" id="overview">{{ doc.content[0].title | capitalize }}</div>
-                            {% if doc.content[0].description %}
-                                <div class="description">{{ doc.content[0].description.text | safe }}</div>
+                            <div class="group-heading top" id="overview">{{ title | capitalize }}</div>
+                            {% if description %}
+                                <div class="description">{{ description.text | safe }}</div>
                             {% endif %}
                         </div>
                     </div>
 
                     {# Resource groups #}
-                    {% for group in doc.content[0].content %}
-                        <div class="row">
-                            <div class="col-6 lhs">
-                                <div class="group-heading way-point" id="{{ group.id }}">{{ group.title }}</div>
-                                {% if group.description %}
-                                    <div class="description">{{ group.description.text | safe }}</div>
-                                {% endif %}
+                    {% for group in groups %}
+                        {% if group.title.length %}
+                            <div class="row">
+                                <div class="col-6 lhs">
+                                    <div class="group-heading way-point" id="{{ group.id }}">{{ group.title }}</div>
+                                    {% if group.description %}
+                                        <div class="description">{{ group.description.text | safe }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-6 rhs"></div>
                             </div>
-                            <div class="col-6 rhs"></div>
-                        </div>
+                        {% endif %}
 
                         {# Resources #}
                         {% for resource in group.content %}
@@ -149,13 +148,13 @@
                                             <div class="rhs-heading big">Request</div>
 
                                             {# Request Headers #}
-                                            {% if transition.xhrContent.headers.length %}
+                                            {% if transition.transaction.request.props.headers.length %}
                                                 <div class="headers">
                                                     <div class="rhs-heading">Request Headers</div>
                                                     <div class="rhs-highlight code">
                                                         <div class="hljs">
-                                                            {%- for header in transition.xhrContent.headers -%}
-                                                                <span class="hljs-attribute">{{ header.name }}</span>: {{ header.value }}
+                                                            {%- for header in transition.transaction.request.props.headers -%}
+                                                                <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }}
                                                             {%- endfor -%}
                                                         </div>
                                                     </div>
@@ -163,20 +162,18 @@
                                             {% endif %}
 
                                             {# Request Body #}
-                                            {% for transaction in transition.content[0].content %}
-                                                {% if transaction.type === 'httpRequest' and transaction.content[0].type === 'body' %}
-                                                    <div class="rhs-heading">Request Body</div>
-                                                    <div class="rhs-highlight">
-                                                        <pre><code>
-                                                            {{- transaction.content[0].content -}}
-                                                        </code></pre>
-                                                    </div>
-                                                {% endif %}
-                                            {% endfor %}
+                                            {% if transition.transaction.request.body %}
+                                                <div class="rhs-heading">Request Body</div>
+                                                <div class="rhs-highlight">
+                                                    <pre><code>
+                                                        {{- transition.transaction.request.body -}}
+                                                    </code></pre>
+                                                </div>
+                                            {% endif %}
 
                                             {# Request Example #}
                                             {% if transition.snippets %}
-                                                <div class="sample-request">
+                                                <div class="sample-request" style="display: none">
                                                     <div class="rhs-heading">Example Request</div>
                                                     <div class="rhs-highlight">
                                                         {%- for lang in languages -%}
@@ -192,36 +189,34 @@
 
                                             {# Responses #}
                                             <div class="sample-response">
-                                                {% for transaction in transition.content[0].content %}
-                                                    {% if transaction.type === 'httpResponse' %}
-                                                        <div class="rhs-heading big">
-                                                            <span>Response&nbsp;</span>
-                                                            <span class="status-code">{{ transaction.props.statusCode }}</span>
-                                                        </div>
+                                                {% for response in transition.transaction.responses %}
+                                                    <div class="rhs-heading big">
+                                                        <span>Response&nbsp;</span>
+                                                        <span class="status-code">{{ response.props.statusCode }}</span>
+                                                    </div>
 
-                                                        {# Headers #}
-                                                        {% if transaction.props.headers.length %}
-                                                            <div class="headers">
-                                                                <div class="rhs-heading">Response Headers</div>
-                                                                <div class="rhs-highlight code">
-                                                                    <div class="hljs">
-                                                                        {% for header in transaction.props.headers %}
-                                                                            <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }} {% if not loop.last %}<br />{% endif %}
-                                                                        {% endfor %}
-                                                                    </div>
+                                                    {# Headers #}
+                                                    {% if response.props.headers.length %}
+                                                        <div class="headers">
+                                                            <div class="rhs-heading">Response Headers</div>
+                                                            <div class="rhs-highlight code">
+                                                                <div class="hljs">
+                                                                    {% for header in response.props.headers %}
+                                                                        <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }} {% if not loop.last %}<br />{% endif %}
+                                                                    {% endfor %}
                                                                 </div>
                                                             </div>
-                                                        {% endif %}
+                                                        </div>
+                                                    {% endif %}
 
-                                                        {# Body #}
-                                                        {% if transaction.content[0].type === 'body' %}
-                                                            <div class="rhs-heading">Response Body</div>
-                                                            <div class="rhs-highlight">
-                                                                <pre><code>
-                                                                    {{- transaction.content[0].content -}}
-                                                                </code></pre>
-                                                            </div>
-                                                        {% endif %}
+                                                    {# Body #}
+                                                    {% if response.body %}
+                                                        <div class="rhs-heading">Response Body</div>
+                                                        <div class="rhs-highlight">
+                                                            <pre><code>
+                                                                {{- response.body -}}
+                                                            </code></pre>
+                                                        </div>
                                                     {% endif %}
                                                 {% endfor %}
                                             </div>

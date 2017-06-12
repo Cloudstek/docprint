@@ -8,6 +8,10 @@ var _promise = require('babel-runtime/core-js/promise');
 
 var _promise2 = _interopRequireDefault(_promise);
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
@@ -104,6 +108,8 @@ exports.default = (() => {
 
         let output = yield parser.parse(result);
 
+        console.log((0, _stringify2.default)(output, null, '\t'));
+
         let dataStructures = parser.getDataStructures(output);
 
         let env = _nunjucks2.default.configure(_path2.default.dirname(options.template));
@@ -112,6 +118,9 @@ exports.default = (() => {
 
         let res = yield renderTemplate(env, _path2.default.basename(options.template), {
             doc: output,
+            groups: output.content.content,
+            title: output.content.title,
+            description: output.content.description,
             css: customCss,
             header: customHeader,
             dataStructures: dataStructures,
@@ -172,7 +181,7 @@ function addFilters(env, options) {
     }, true);
 
     env.addFilter('highlightUrl', url => {
-        return url.replace(/({.+?})/g, '<span class="hljs-keyword">$1</span>');
+        return url && url.replace(/({.+?})/g, '<span class="hljs-keyword">$1</span>');
     });
 
     return env;

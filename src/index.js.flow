@@ -59,6 +59,8 @@ export default async (options: Object = {}) => {
 
     let output: Object = await parser.parse(result);
 
+    console.log(JSON.stringify(output, null, '\t'));
+
     // Get dataStructures
     let dataStructures = parser.getDataStructures(output);
 
@@ -71,6 +73,9 @@ export default async (options: Object = {}) => {
     // Render
     let res = await renderTemplate(env, path.basename(options.template), {
         doc: output,
+        groups: output.content.content,
+        title: output.content.title,
+        description: output.content.description,
         css: customCss,
         header: customHeader,
         dataStructures: dataStructures,
@@ -149,7 +154,7 @@ function addFilters(env, options) {
 
     // Highlight URL parameters
     env.addFilter('highlightUrl', url => {
-        return url.replace(/({.+?})/g, '<span class="hljs-keyword">$1</span>');
+        return url && url.replace(/({.+?})/g, '<span class="hljs-keyword">$1</span>');
     });
 
     return env;
