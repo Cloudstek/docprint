@@ -2,25 +2,62 @@
 // @flow
 
 import program from 'commander';
+import browserSync from 'browser-sync';
 import docprint from '../src';
 
 program
-    .option('-p, --filepath <filepath>', 'Path to the blueprint file')
-    .option('-d, --destination <destination>', 'Destination folder')
-    .option('-h, --header <header>', 'Custom nunjucks/HTML header file or contents')
-    .option('-c, --css <css>', 'Custom CSS file or contents')
+    .option('-i, --input <file>', 'Path to the blueprint file')
+    .option('-o, --output <dir>', 'Destination folder')
+    .option('-h, --header <header>', 'Custom nunjucks/HTML header file')
+    .option('-c, --css <css>', 'Custom CSS/LESS file')
     .option('-t, --template <file>', 'Custom nunjucks template file or one of the built-in templates')
+    .option('-w, --watch', 'Watch for changes')
     .parse(process.argv);
 
-if (!program.filepath || !program.destination || program.destination.length === 0 || program.filepath.length === 0) {
+if (!program.input || !program.output || program.output.length === 0 || program.input.length === 0) {
     program.help();
     process.exit();
 }
 
-docprint({
-    filepath: program.filepath,
-    destination: program.destination,
-    header: program.header,
-    css: program.css,
-    template: program.template
-});
+async function build() {
+    return docprint({
+        filepath: program.input,
+        destination: program.output,
+        header: program.header,
+        css: program.css,
+        template: program.template
+    });
+}
+
+function watch(bs, files: Array<string>) {
+    files = files.filter(a => a);
+
+    for (let file of files) {
+        bs.watch(file).on('change', () => {
+            bs.notify('Rebruilding, please wait!');
+            build().then(() => {
+                bs.reload();
+            });
+        });
+    }
+}
+
+// Watch for blueprint changes
+if (program.watch) {
+    let bs = browserSync.create();
+
+    watch(bs, [
+        program.input,
+        program.css,
+        program.header,
+        program.template
+    ]);
+
+    bs.init({
+        server: program.output,
+        notify: false,
+        ui: false
+    });
+}
+
+build();

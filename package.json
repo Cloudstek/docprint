@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/swathysubhash/docprint#readme",
   "dependencies": {
+    "browser-sync": "^2.18.12",
     "cheerio": "^1.0.0-rc.1",
     "commander": "2.9.0",
     "drafter": "^1.2.0",
