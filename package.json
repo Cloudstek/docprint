@@ -50,6 +50,7 @@
     "flow-bin": "^0.47.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
+    "gulp-chmod": "^2.0.0",
     "gulp-eslint": "^3.0.1",
     "gulp-rename": "^1.2.2"
   }
