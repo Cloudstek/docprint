@@ -249,7 +249,7 @@
 
             /**
              * Set selected navigation item and expand parents (if any)
-             * @param {element} el
+             * @param {element} clicked navigation element
              */
             function setSelection(el) {
                 if ($(el).hasClass('resource-nav-item')) {
@@ -262,6 +262,31 @@
                 } else if ($(el).parent().hasClass('group-header')) {
                     $('.sidebar .resource-header.expand').removeClass('expand');
                     $('.sidebar .child-nav-item.selected').removeClass('selected');
+                }
+            }
+
+            /**
+             * Restore scroll position on (re)load
+             */
+            function restoreScroll() {
+                var lastScroll = sessionStorage && sessionStorage.getItem('lastScroll');
+
+                if (lastScroll) {
+                    $('.container').scrollTop(lastScroll);
+                    return;
+                }
+
+                // Location hash (fix scrolling)
+                if (window.location.hash) {
+                    var scrollEl = $(window.location.hash);
+
+                    if (scrollEl.length) {
+                        // Scroll document container
+                        $('.container').scrollTop($(scrollEl).offset().top - headerHeight);
+
+                        // Activate menu element
+                        setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
+                    }
                 }
             }
 
@@ -296,16 +321,16 @@
                     $('.sample-request code').hide();
                     $('.sample-request code[class~="' + $(e.target).data('lang') + '"]').show();
 
-                    localStorage.setItem('exampleLang', $(e.target).data('lang'));
+                    sessionStorage && sessionStorage.setItem('exampleLang', $(e.target).data('lang'));
                 });
 
                 // Active language on load
                 if ($('.top-header .lang-header [data-lang]')) {
-                    var lastLang = localStorage.getItem('exampleLang');
+                    var lastLang = sessionStorage.getItem('exampleLang');
                     var selected = $('.top-header .lang-header [data-lang="' + lastLang + '"]');
 
-                    if (!selected) {
-                        selected = $('.top-header .lang-header [data-lang]');
+                    if (selected.length === 0) {
+                        selected = $('.top-header .lang-header [data-lang]')[0];
                     }
 
                     if ($(selected).data('lang') == 'none') {
@@ -319,27 +344,21 @@
                     $('.sample-request code[class~="' + $(selected).data('lang') + '"]').show();
                 }
 
-                // Location hash (fix scrolling)
-                if (window.location.hash) {
-                    var scrollEl = $(window.location.hash);
-
-                    if (scrollEl.length) {
-                        // Scroll document container
-                        $('.container').scrollTop($(scrollEl).offset().top - headerHeight);
-
-                        // Activate menu element
-                        setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
-                    }
-                }
-
                 // Waypoints
                 $('.way-point[id]').waypoint({
                     continuous: false,
                     context: $('.container'),
-                    offset: headerHeight,
                     handler: function(direction) {
                         setSelection($('.sidebar a[href=\"#' + this.element.id + '\"]'));
                     }
+                });
+
+                // Restore scroll position
+                restoreScroll();
+
+                // Save scroll position
+                $(window).on('beforeunload', function(e) {
+                    sessionStorage && sessionStorage.setItem('lastScroll', $('.container').scrollTop());
                 });
             });
         </script>

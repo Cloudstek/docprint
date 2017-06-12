@@ -238,8 +238,12 @@ class RefractParser {
 
         current.transaction = current.transaction && this._parse(current.transaction, {}, current).current;
 
-        let method = (0, _util.at)(current, 'transaction.content.0.props.method');
-        current.id = 'transition-' + (0, _util.slugify)(meta.title + '-' + method);
+        let method = current.transaction && current.transaction.request.props.method;
+        if (method) {
+            method = '-' + method;
+        }
+
+        current.id = 'transition-' + (0, _util.slugify)(meta.title + method);
         current.xhrContent = this._xhrContent(current, parent);
         current.snippets = {};
 

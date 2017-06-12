@@ -59,8 +59,6 @@ export default async (options: Object = {}) => {
 
     let output: Object = await parser.parse(result);
 
-    console.log(JSON.stringify(output, null, '\t'));
-
     // Get dataStructures
     let dataStructures = parser.getDataStructures(output);
 
