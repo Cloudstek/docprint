@@ -1993,7 +1993,7 @@ func main() {
             /**
              * Restore scroll position on (re)load
              */
-            function restoreScroll() {
+            function restoreScroll(offset) {
                 var lastScroll = sessionStorage && sessionStorage.getItem('lastScroll');
 
                 if (lastScroll) {
@@ -2007,7 +2007,7 @@ func main() {
 
                     if (scrollEl.length) {
                         // Scroll document container
-                        $('.container').scrollTop($(scrollEl).offset().top - headerHeight);
+                        $('.container').scrollTop($(scrollEl).offset().top - offset);
 
                         // Activate menu element
                         setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
@@ -2079,7 +2079,7 @@ func main() {
                 });
 
                 // Restore scroll position
-                restoreScroll();
+                restoreScroll(headerHeight);
 
                 // Save scroll position
                 $(window).on('beforeunload', function(e) {
