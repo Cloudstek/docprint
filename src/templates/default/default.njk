@@ -266,6 +266,8 @@
             }
 
             $(function() {
+                var headerHeight = $('.documentation').offset().top || 50;
+
                 // Child attributes hide/show
                 $('.doc-body .show-child-attr > span').on('click', function(e) {
                     var parent = e.target.parentNode.parentNode;
@@ -320,17 +322,21 @@
                 // Location hash (fix scrolling)
                 if (window.location.hash) {
                     var scrollEl = $(window.location.hash);
-                    if (scrollEl.length) {
-                        scrollEl[0].scrollIntoView({block: "start", behavior: "instant"});
-                    }
 
-                    setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
+                    if (scrollEl.length) {
+                        // Scroll document container
+                        $('.container').scrollTop($(scrollEl).offset().top - headerHeight);
+
+                        // Activate menu element
+                        setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
+                    }
                 }
 
                 // Waypoints
                 $('.way-point[id]').waypoint({
                     continuous: false,
                     context: $('.container'),
+                    offset: headerHeight,
                     handler: function(direction) {
                         setSelection($('.sidebar a[href=\"#' + this.element.id + '\"]'));
                     }
