@@ -1,174 +1,81 @@
 // @flow
 
 import fs from 'fs-extra';
-import promisify from 'promisify-es6';
 import path from 'path';
-import nunjucks from 'nunjucks';
 import minifier from 'html-minifier';
 
-import less from 'less';
-import _drafter from 'drafter';
-import {transcludeFile as _transcludeFile} from 'hercule';
+import {ApiParser} from './apiParser';
+import {Renderer as TemplateRenderer} from './renderer';
 
-import {RefractParser} from './parser';
-import {at, stripSlash} from './util';
-
+/**
+ * Main
+ * @param {Object} options
+ * @return {Promise}
+ */
 export default async (options: Object = {}) => {
     // Check options
-    if (!options.filepath || options.filepath.length === 0) {
+    if (!options.input || options.input.length === 0) {
         throw new Error('No input file given.');
     }
 
-    // Custom header and css
-    let customCss: ?string;
-    let customHeader: ?string;
-    options.template = options.template || path.join(__dirname, 'templates', 'default', 'default.njk');
-
-    // Promisify
-    const transcludeFile = promisify(_transcludeFile);
-    const drafter = promisify(_drafter.parse);
-
     // Custom CSS
     if (options.css) {
-        customCss = fs.readFileSync(options.css, 'utf8');
+        options.css = fs.readFileSync(options.css, 'utf8');
     }
 
     // Custom header
     if (options.header) {
-        customHeader = fs.readFileSync(options.header, 'utf8');
+        options.header = fs.readFileSync(options.header, 'utf8');
     }
 
-    // Transclude
-    let result: string;
-    result = await transcludeFile(options.filepath);
-    result = await drafter(result, {
-        requireBlueprintName: true
+    // Template
+    options.template = options.template || path.join(__dirname, 'themes', 'default', 'default.njk');
+
+    if (!options.template.endsWith('.njk')) {
+        try {
+            options.template = require.resolve('docprint-theme-' + options.template);
+        } catch (err) {
+            throw new Error('Could not load theme: ' + options.template);
+        }
+    }
+
+    // Parse API Blueprint
+    const parser = new ApiParser({
+        drafter: {
+            requireBlueprintName: true
+        }
     });
 
-    // Parse refract output
-    let parser = new RefractParser({
-        apiUrl: getHost(result)
-    });
+    let result: Object = await parser.parse(options.input);
 
-    let output: Object = await parser.parse(result);
-
-    // Get dataStructures
-    let dataStructures = parser.getDataStructures(output);
-
-    // Nunjucks
-    let env = nunjucks.configure(path.dirname(options.template), {
+    // Render template
+    const renderer = new TemplateRenderer(path.dirname(options.template), {
         trimBlocks: true
     });
 
-    // Add Nunjucks filters
-    env = addFilters(env, options);
-
-    // Render
-    let res = await renderTemplate(env, path.basename(options.template), {
-        doc: output,
-        groups: output.content.content,
-        title: output.content.title,
-        description: output.content.description,
-        customCss: customCss,
-        customHeader: customHeader,
-        dataStructures: dataStructures,
-        languages: parser.getLanguages()
+    let output = await renderer.render(path.basename(options.template), {
+        doc: result,
+        groups: result.content.content,
+        title: result.content.title,
+        description: result.content.description,
+        customCss: options.css,
+        customHeader: options.header,
+        dataStructures: result.dataStructures,
+        languages: result.languages
     });
 
     // Minify HTML / CSS / JS
     if (options.minify === true) {
-        res = minifier.minify(res, {
+        output = minifier.minify(output, {
             minifyCSS: true,
             minifyJS: true
         });
     }
 
     // Save
-    fs.ensureDirSync(options.destination);
-    fs.writeFileSync(path.join(options.destination, 'index.html'), res);
-};
-
-/**
- * Get API host from meta
- * @param {Object} doc Refract object
- * @return {string|null}
- */
-function getHost(doc: Object): ?string {
-    let metas = at(doc, 'content.0.attributes.meta');
-    if (metas && metas.find) {
-        let hostMeta = metas.find(meta => {
-            return at(meta, 'content.key.content') === 'HOST';
-        });
-
-        return hostMeta ? stripSlash(at(hostMeta, 'content.value.content')) : null;
+    if (/\.\w+$/.test(options.output) === false) {
+        options.output = path.join(options.output, 'index.html');
     }
-}
 
-/**
- * Render nunjucks template
- * @param {Object} env Nunjucks environment
- * @param {string} template Template file
- * @param {Object} context Template context
- * @return {Promise}
- */
-async function renderTemplate(env, template, context) {
-    return new Promise((resolve, reject) => {
-        env.render(template, context, (err, res) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            resolve(res);
-        });
-    });
-}
-
-/**
- * Add filters to nunjucks environmment
- * @param {Object} env Nunjucks environment
- * @param {Object} options Program options
- */
-function addFilters(env, options) {
-    // Find property in object
-    env.addFilter('find', (obj, property, value) => {
-        if (!Array.isArray(obj)) {
-            return;
-        }
-
-        return obj.find(o => o[property] === value);
-    });
-
-    // Check if array or string includes needle
-    env.addFilter('includes', (haystack, needle, position = 0) => {
-        return haystack.includes(needle, position);
-    });
-
-    // Convert LESS
-    env.addFilter('less', (code, cb) => {
-        let paths = ['.'];
-
-        if (code.endsWith('.less')) {
-            let filePath = path.resolve(path.dirname(options.template), code);
-            code = fs.readFileSync(filePath, 'utf8');
-            paths.push(path.dirname(filePath));
-        }
-
-        less.render(code, {
-            paths: paths
-        }, (err, res) => {
-            if (err) {
-                cb(err.toString());
-            }
-
-            cb(null, res.css);
-        });
-    }, true);
-
-    // Highlight URL parameters
-    env.addFilter('highlightUrl', url => {
-        return url && url.replace(/({.+?})/g, '<span class="hljs-keyword">$1</span>');
-    });
-
-    return env;
-}
+    fs.outputFileSync(options.output, output);
+};

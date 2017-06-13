@@ -1,33 +1,29 @@
 // @flow
 
+/**
+ * Sanitize array
+ * @param {Array.any} input Input array
+ * @return {Array.any} Sanitized array
+ */
 export function sanitize(input: Array<any>) {
     return input.filter(a => a);
 }
 
+/**
+ * Capitalize string
+ * @param {string} str Input string
+ * @return {string}
+ */
 export function capitalize(str: ?string) {
     return str && str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export function at(o: ?Object, path: ?string, def: ?any): any {
-    if (!o || !path) {
-        return o;
-    }
-
-    let pointer = o;
-    let failed = false;
-
-    for (let p of path.split('.')) {
-        if (pointer[p] !== null && pointer[p] !== undefined && !failed) {
-            pointer = pointer[p];
-        } else {
-            failed = true;
-        }
-    }
-
-    return failed ? (o[path] || def) : pointer;
-}
-
-export function stripSlash(str: ?string) {
+/**
+ * Strip slash from the end of a string
+ * @param {string} str Input string
+ * @return {string|null}
+ */
+export function stripSlash(str: ?string): ?string {
     if (str && str.endsWith('/')) {
         return str.substr(0, str.length - 1);
     }
@@ -35,7 +31,12 @@ export function stripSlash(str: ?string) {
     return str;
 }
 
-export function slugify(str: string) {
+/**
+ * Slugify string
+ * @param {string} str Input string to slugify
+ * @return {string}
+ */
+export function slugify(str: string): string {
     return str && str.toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w-]+/g, '')

@@ -12,12 +12,14 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 let build = (() => {
     var _ref = (0, _asyncToGenerator3.default)(function* () {
         return (0, _src2.default)({
-            filepath: _commander2.default.input,
-            destination: _commander2.default.output,
+            input: _commander2.default.input,
+            output: _commander2.default.output,
             header: _commander2.default.header,
             css: _commander2.default.css,
             template: _commander2.default.template,
             minify: _commander2.default.minify || false
+        }).catch(function (err) {
+            console.error(err);
         });
     });
 

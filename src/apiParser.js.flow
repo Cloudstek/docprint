@@ -1,0 +1,131 @@
+// @flow
+
+import {transcludeFile} from 'hercule';
+import drafter from 'drafter';
+import {RefractParser} from './refractParser';
+
+import {stripSlash} from './util';
+
+export class ApiParser {
+
+    options: Object = {
+        drafter: {},
+        hercule: {},
+        languages: [
+            {name: 'curl', displayName: 'cURL', snippet: {target: 'shell', client: 'curl'}, hljs: 'bash'},
+            {name: 'node', displayName: 'NodeJS', snippet: {target: 'node', client: 'request'}, hljs: 'javascript'},
+            {name: 'python', displayName: 'Python', snippet: {target: 'python', client: 'python3'}, hljs: 'python'},
+            {name: 'java', displayName: 'Java', snippet: {target: 'java', client: 'okhttp'}, hljs: 'java'},
+            {name: 'ruby', displayName: 'Ruby', snippet: {target: 'ruby', client: 'native'}, hljs: 'ruby'},
+            {name: 'php', displayName: 'PHP', snippet: {target: 'php', client: 'ext-curl'}, hljs: 'php'},
+            {name: 'go', displayName: 'Go', snippet: {target: 'go', client: 'native'}, hljs: 'go'}
+        ]
+    };
+
+    constructor(options: Object = {}) {
+        this.options = Object.assign({}, this.options, options);
+    }
+
+    /**
+     * Example languages
+     * @type {Array.Object}
+     */
+    get languages(): Array<Object> {
+        return this.options.languages || [];
+    }
+
+    /**
+     * Parse API Blueprint and return result as refract data
+     * @param {string} file API Blueprint file path
+     * @return {Promise.Object} Refract data
+     */
+    async parseRaw(file: string): Promise<Object> {
+        return this._transclude(file, this.options.hercule).then(contents => {
+            return this._parseApi(contents, this.options.drafter);
+        });
+    }
+
+    /**
+     * Parse API Blueprint and return result for rendering templates
+     * @param {string} file API Blueprint file path
+     * @return {Promise} Result for rendering templates with
+     */
+    async parse(file: string): Promise<Object> {
+        return this.parseRaw(file)
+            .then(contents => {
+                let apiUrl = this._getHost(contents);
+
+                return this._parseRefract(contents, {
+                    apiUrl: apiUrl,
+                    languages: this.options.languages
+                });
+            });
+    }
+
+    /**
+     * Transclude file
+     * @see https://www.npmjs.com/package/hercule#transcludeFile
+     * @param {string} file Input file
+     * @param {Object} options Options
+     * @return {Promise.string} Transcluded API Blueprint
+     */
+    async _transclude(file: string, options: Object = {}): Promise<string> {
+        return new Promise((resolve, reject) => {
+            transcludeFile(file, options, (err, output) => {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve(output);
+            });
+        });
+    }
+
+    /**
+     * Parse API Blueprint
+     * @see https://www.npmjs.com/package/drafter
+     * @param {string} contents API Blueprint file contents
+     * @param {Object} options Drafter options
+     * @return {Promise.Object} Refract output
+     */
+    async _parseApi(contents: string, options: Object = {}): Promise<Object> {
+        return new Promise((resolve, reject) => {
+            drafter.parse(contents, options, (err, output) => {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve(output);
+            });
+        });
+    }
+
+    /**
+     * Parse refract output for use with templates
+     * @param {Object} doc Refract object
+     * @param {Object} options Refract parser options
+     * @return {Promise.Object} Result object for rendering templates
+     */
+    async _parseRefract(doc: Object, options: Object = {}): Promise<Object> {
+        let parser = new RefractParser(options);
+
+        return parser.parse(doc);
+    }
+
+    /**
+     * Get API host from meta
+     * @param {Object} doc Refract object
+     * @return {string|null}
+     */
+    _getHost(doc: Object): ?string {
+        let metas = doc.content[0].attributes.meta || null;
+
+        if (metas) {
+            let hostMeta = metas.find(meta => {
+                return meta.content.key.content === 'HOST';
+            });
+
+            return hostMeta ? stripSlash(hostMeta.content.value.content) : null;
+        }
+    }
+}

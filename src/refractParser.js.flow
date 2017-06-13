@@ -3,21 +3,13 @@
 import HTTPSnippet from 'httpsnippet';
 import cheerio from 'cheerio';
 import markdownIt from 'markdown-it';
-import {at, sanitize, slugify, capitalize} from './util';
+import {sanitize, slugify, capitalize} from './util';
 
 export class RefractParser {
-    languages: Array<Object> = [
-        {name: 'curl', displayName: 'cURL', snippet: {target: 'shell', client: 'curl'}, hljs: 'bash'},
-        {name: 'node', displayName: 'NodeJS', snippet: {target: 'node', client: 'request'}, hljs: 'javascript'},
-        {name: 'python', displayName: 'Python', snippet: {target: 'python', client: 'python3'}, hljs: 'python'},
-        {name: 'java', displayName: 'Java', snippet: {target: 'java', client: 'okhttp'}, hljs: 'java'},
-        {name: 'ruby', displayName: 'Ruby', snippet: {target: 'ruby', client: 'native'}, hljs: 'ruby'},
-        {name: 'php', displayName: 'PHP', snippet: {target: 'php', client: 'ext-curl'}, hljs: 'php'},
-        {name: 'go', displayName: 'Go', snippet: {target: 'go', client: 'native'}, hljs: 'go'}
-    ];
 
     options: {
-        apiUrl: 'http://example.com/api/v1'
+        apiUrl: 'http://example.com/api/v1',
+        languages: []
     };
 
     markdownIt: markdownIt;
@@ -42,25 +34,16 @@ export class RefractParser {
             throw new Error('Input is not a valid refract object.');
         }
 
+        // Data structures
+        let ds = doc.content[0].content || null;
+        ds = ds && ds.find(el => el.type === 'dataStructures');
+
         return {
             type: 'result',
+            dataStructures: (ds && ds.content) || [],
+            languages: this.options.languages,
             content: doc.content && doc.content.length > 0 && this._parse(doc.content[0], {}, {type: 'result'}).current
         };
-    }
-
-    getDataStructures(doc: Object): Array<Object> {
-        if (!doc.type && !doc.type === 'result') {
-            throw new Error('Input is not a valid RefractParser result object.');
-        }
-
-        let ds = at(doc, 'content.0.content');
-
-        ds = ds && ds.find(el => el.type === 'dataStructures');
-        return (ds && ds.content) || [];
-    }
-
-    getLanguages(): Array<Object> {
-        return this.languages;
     }
 
     _parse(doc: Object, current: Object = {}, parent: Object = {}): Object {
@@ -197,7 +180,7 @@ export class RefractParser {
         current.snippets = {};
 
         if (current.xhrContent) {
-            for (let lang of this.languages) {
+            for (let lang of this.options.languages) {
                 current.snippets[lang.name] = unescape((new HTTPSnippet(current.xhrContent)).convert(lang.snippet.target, lang.snippet.type));
             }
         }

@@ -32,8 +32,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 class RefractParser {
 
     constructor(options = {}) {
-        this.languages = [{ name: 'curl', displayName: 'cURL', snippet: { target: 'shell', client: 'curl' }, hljs: 'bash' }, { name: 'node', displayName: 'NodeJS', snippet: { target: 'node', client: 'request' }, hljs: 'javascript' }, { name: 'python', displayName: 'Python', snippet: { target: 'python', client: 'python3' }, hljs: 'python' }, { name: 'java', displayName: 'Java', snippet: { target: 'java', client: 'okhttp' }, hljs: 'java' }, { name: 'ruby', displayName: 'Ruby', snippet: { target: 'ruby', client: 'native' }, hljs: 'ruby' }, { name: 'php', displayName: 'PHP', snippet: { target: 'php', client: 'ext-curl' }, hljs: 'php' }, { name: 'go', displayName: 'Go', snippet: { target: 'go', client: 'native' }, hljs: 'go' }];
-
         this.options = (0, _assign2.default)({}, this.options, options);
 
         this.markdownIt = (0, _markdownIt2.default)({
@@ -52,25 +50,15 @@ class RefractParser {
             throw new Error('Input is not a valid refract object.');
         }
 
+        let ds = doc.content[0].content || null;
+        ds = ds && ds.find(el => el.type === 'dataStructures');
+
         return {
             type: 'result',
+            dataStructures: ds && ds.content || [],
+            languages: this.options.languages,
             content: doc.content && doc.content.length > 0 && this._parse(doc.content[0], {}, { type: 'result' }).current
         };
-    }
-
-    getDataStructures(doc) {
-        if (!doc.type && !doc.type === 'result') {
-            throw new Error('Input is not a valid RefractParser result object.');
-        }
-
-        let ds = (0, _util.at)(doc, 'content.0.content');
-
-        ds = ds && ds.find(el => el.type === 'dataStructures');
-        return ds && ds.content || [];
-    }
-
-    getLanguages() {
-        return this.languages;
     }
 
     _parse(doc, current = {}, parent = {}) {
@@ -253,7 +241,7 @@ class RefractParser {
             var _iteratorError = undefined;
 
             try {
-                for (var _iterator = (0, _getIterator3.default)(this.languages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                for (var _iterator = (0, _getIterator3.default)(this.options.languages), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     let lang = _step.value;
 
                     current.snippets[lang.name] = unescape(new _httpsnippet2.default(current.xhrContent).convert(lang.snippet.target, lang.snippet.type));

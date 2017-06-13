@@ -22,12 +22,14 @@ if (!program.input || !program.output || program.output.length === 0 || program.
 
 async function build() {
     return docprint({
-        filepath: program.input,
-        destination: program.output,
+        input: program.input,
+        output: program.output,
         header: program.header,
         css: program.css,
         template: program.template,
         minify: program.minify || false
+    }).catch(err => {
+        console.error(err);
     });
 }
 
