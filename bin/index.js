@@ -16,7 +16,8 @@ let build = (() => {
             destination: _commander2.default.output,
             header: _commander2.default.header,
             css: _commander2.default.css,
-            template: _commander2.default.template
+            template: _commander2.default.template,
+            minify: _commander2.default.minify || false
         });
     });
 
@@ -39,7 +40,7 @@ var _src2 = _interopRequireDefault(_src);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_commander2.default.option('-i, --input <file>', 'Path to the blueprint file').option('-o, --output <dir>', 'Destination folder').option('-h, --header <header>', 'Custom nunjucks/HTML header file').option('-c, --css <css>', 'Custom CSS/LESS file').option('-t, --template <file>', 'Custom nunjucks template file or one of the built-in templates').option('-w, --watch', 'Watch for changes').parse(process.argv);
+_commander2.default.option('-i, --input <file>', 'Path to the blueprint file').option('-o, --output <dir>', 'Destination folder').option('-h, --header <header>', 'Custom nunjucks/HTML header file').option('-c, --css <css>', 'Custom CSS/LESS file').option('-t, --template <file>', 'Custom template file or one of the docprint theme packages (without docprint-theme- prefix)').option('-m, --minify', 'Minify output').option('-w, --watch', 'Watch for changes').parse(process.argv);
 
 if (!_commander2.default.input || !_commander2.default.output || _commander2.default.output.length === 0 || _commander2.default.input.length === 0) {
     _commander2.default.help();

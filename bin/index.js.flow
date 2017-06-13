@@ -10,7 +10,8 @@ program
     .option('-o, --output <dir>', 'Destination folder')
     .option('-h, --header <header>', 'Custom nunjucks/HTML header file')
     .option('-c, --css <css>', 'Custom CSS/LESS file')
-    .option('-t, --template <file>', 'Custom nunjucks template file or one of the built-in templates')
+    .option('-t, --template <file>', 'Custom template file or one of the docprint theme packages (without docprint-theme- prefix)')
+    .option('-m, --minify', 'Minify output')
     .option('-w, --watch', 'Watch for changes')
     .parse(process.argv);
 
@@ -25,7 +26,8 @@ async function build() {
         destination: program.output,
         header: program.header,
         css: program.css,
-        template: program.template
+        template: program.template,
+        minify: program.minify || false
     });
 }
 

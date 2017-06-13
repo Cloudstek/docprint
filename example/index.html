@@ -5,386 +5,28 @@
 
         <title>Polls API</title>
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Source+Code+Pro" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css" integrity="sha256-akwTLZec/XAFvgYgVH1T5/369lhA2Efr22xzCNl1nHs=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Source+Code+Pro">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css" integrity="sha256-akwTLZec/XAFvgYgVH1T5/369lhA2Efr22xzCNl1nHs=" crossorigin="anonymous">
 
-        <style type="text/css">
-            .sidebar {
-  font-family: 'Open Sans', sans-serif;
-  bottom: 0;
-  font-weight: 400;
-  left: 0;
-  position: absolute;
-  top: 0;
-  z-index: 75;
-  width: 230px;
-  padding: 20px;
-  padding-top: 45px;
-  background: #fafafa;
-}
-.sidebar nav .group-header {
-  color: #526269;
-  font-weight: 600;
-  font-size: 13px;
-  text-transform: uppercase;
-}
-.sidebar nav > ul {
-  margin: 0.75em 0 1.25em 0.5em;
-}
-.sidebar nav .resource-header > ul {
-  display: none;
-}
-.sidebar nav .resource-header.expand > ul {
-  display: block;
-}
-.sidebar nav .resource-header.expand .resource-nav-item {
-  font-weight: 600;
-}
-.sidebar nav a.child-nav-item.selected {
-  color: #0095dd;
-}
-.sidebar nav a.child-nav-item:hover {
-  color: #0095dd;
-}
-.sidebar nav .transition {
-  padding-left: 1em;
-}
-.doc-body .group-heading {
-  font-weight: 400;
-  font-size: 24px;
-  line-height: 32px;
-  padding: 10px 0;
-  margin: 20px 0;
-}
-.doc-body .resource-heading {
-  padding: 10px 0px;
-  font-weight: 400;
-  font-size: 24px;
-  line-height: 32px;
-}
-.doc-body .transition-heading {
-  color: #292e31;
-  padding: 10px 0px;
-  font-weight: 400;
-  font-size: 24px;
-  line-height: 32px;
-}
-ul.attrs,
-ul.params {
-  border-top: 1px solid #e1e8ed;
-}
-.params .left,
-.attrs .left,
-.params .right,
-.attrs .right {
-  display: inline-block;
-  width: 49.5%;
-  vertical-align: top;
-}
-.params .left,
-.attrs .left {
-  text-align: right;
-  padding-right: 20px;
-  box-sizing: border-box;
-  font-size: 13px;
-  line-height: 21px;
-  word-break: break-all;
-  white-space: normal;
-}
-.params .right,
-.attrs .right {
-  box-sizing: border-box;
-  padding-left: 10px;
-}
-li.param,
-li.attr {
-  padding: 17px 0;
-  border-bottom: 1px solid #f0f4f7;
-  line-height: 24px;
-}
-li.param:last-child,
-li.attr:last-child {
-  border-bottom: none;
-}
-.left {
-  color: #aaa;
-}
-.left span {
-  padding-right: 10px;
-}
-.left .key {
-  color: #000;
-}
-.left span.key {
-  font-weight: 600;
-}
-.left .type {
-  font-style: italic;
-  font-size: 12px;
-}
-.left .example {
-  font-size: 11px;
-}
-.left .required,
-.left .optional {
-  color: #e66e33;
-  text-transform: uppercase;
-  font-size: 10px;
-  font-weight: 600;
-}
-.show-child-attr {
-  color: #0095dd;
-  padding: 6px 0;
-}
-.child-attr {
-  border-radius: 5px;
-}
-.child-attr > .attrs {
-  display: none;
-}
-.child-attr > .show-child-attr > .expand {
-  display: block;
-  cursor: pointer;
-}
-.child-attr > .show-child-attr > .close {
-  display: none;
-  cursor: pointer;
-}
-.child-attr.show {
-  box-shadow: 0 0 1px 0px rgba(128, 128, 128, 0.5);
-}
-.child-attr.show > .attrs {
-  display: block;
-}
-.child-attr.show > .show-child-attr > .expand {
-  display: none;
-}
-.child-attr.show > .show-child-attr > .close {
-  display: block;
-}
-.part-heading {
-  color: #939da3;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 18px;
-  text-transform: uppercase;
-  margin: 15px 0;
-}
-.rhs-heading {
-  margin-bottom: 15px;
-  font-weight: 600;
-  padding: 6px 20px;
-  font-size: 13px;
-}
-.rhs-heading.big {
-  font-size: 16px;
-}
-.rhs-heading .status-code {
-  padding: 3px 6px;
-  display: inline-block;
-  background: #526269;
-  border-radius: 3px;
-}
-.rhs-highlight {
-  padding: 0 20px;
-  margin: 20px;
-  padding: 20px 20px;
-  background: #272b2d;
-  border-radius: 5px;
-  margin-top: 5px;
-  margin-bottom: 30px;
-}
-.hljs {
-  background: none!important;
-}
-code,
-.code {
-  font-family: 'Source Code Pro', Menlo, monospace;
-  font-size: 13px;
-}
-* {
-  outline: none;
-  box-sizing: border-box;
-}
-body {
-  -webkit-font-smoothing: antialiased;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  font-family: 'Open Sans', sans-serif;
-  cursor: default;
-  transition: linear left 0.1s;
-  margin: 0;
-  padding: 0;
-  font-weight: normal;
-  font-size: 14px;
-  color: #272b2d;
-}
-a {
-  text-decoration: none;
-  color: inherit;
-}
-ul {
-  padding: 0;
-  list-style: none;
-}
-h2 {
-  font-size: 24px;
-  font-weight: 400;
-  padding: 10px 0px;
-}
-mark {
-  background: transparent;
-  border-radius: 3px;
-  color: yellow;
-}
-pre {
-  margin: 0;
-}
-.top-header {
-  position: absolute;
-  top: 0;
-  left: 270px;
-  right: 0;
-  z-index: 100;
-  height: 50px;
-  background: transparent;
-  overflow: hidden;
-}
-.top-header .part-header {
-  width: 50%;
-  display: inline-block;
-  vertical-align: top;
-  box-sizing: border-box;
-}
-.top-header .lang-header {
-  padding: 10px 15px;
-  position: absolute;
-  left: 50%;
-  right: 0;
-  box-shadow: 0 0 1px 0;
-  background: #2D3134;
-}
-.top-header .lang-header ul {
-  margin: 0;
-}
-.top-header .lang-header ul > li {
-  padding: 3px 12px;
-  margin-right: 8px;
-  border-radius: 3px;
-  cursor: pointer;
-  border: 1px solid #282c2f;
-  color: #dde4e8;
-  display: inline-block;
-}
-.top-header .lang-header ul > li.selected {
-  background: #272b2d;
-  color: #45f945;
-  font-weight: 600;
-}
-header {
-  display: inline-block;
-  width: 100%;
-  position: absolute;
-  top: 0px;
-  height: 50px;
-  z-index: 5000;
-  border-bottom: 1px solid #f6f6f6;
-  padding: 8px 20px;
-  font-size: 22px;
-}
-header h1 {
-  font-size: 22px;
-  margin: 0;
-}
-header h1 span {
-  font-weight: 300;
-}
-.documentation {
-  display: inline-block;
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  top: 50px;
-}
-.container {
-  bottom: 0;
-  right: 0;
-  position: absolute;
-  top: 0;
-  left: 270px;
-  z-index: 50;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-.doc-body {
-  box-sizing: border-box;
-  background-image: -webkit-linear-gradient(-90deg, #2D3134 50%, #FFFFFF 50%);
-  background-image: linear-gradient(-90deg, #2D3134 50%, #FFFFFF 50%);
-}
-.header-anchor {
-  visibility: hidden;
-}
-.col-12 {
-  width: 100%;
-}
-.col-6 {
-  width: 50%;
-}
-.row {
-  padding-bottom: 50px;
-}
-.row:after {
-  clear: both;
-  content: '';
-  display: table;
-}
-.lhs,
-.rhs {
-  float: left;
-  box-sizing: border-box;
-}
-.lhs {
-  padding: 0 20px;
-}
-.rhs {
-  padding-top: 40px;
-  color: #dde4e8;
-}
-
-        </style>
-        <style type="text/css">
-            
-        </style>
-    </head>
+        <style type="text/css">.sidebar{font-family:'Open Sans',sans-serif;bottom:0;font-weight:400;left:0;position:absolute;top:0;z-index:75;width:230px;padding:20px;padding-top:45px;background:#fafafa}.sidebar nav .group-header{color:#526269;font-weight:600;font-size:13px;text-transform:uppercase}.sidebar nav>ul{margin:.75em 0 1.25em .5em}.sidebar nav .resource-header>ul{display:none}.sidebar nav .resource-header.expand>ul{display:block}.sidebar nav .resource-header.expand .resource-nav-item{font-weight:600}.sidebar nav a.child-nav-item.selected{color:#0095dd}.sidebar nav a.child-nav-item:hover{color:#0095dd}.sidebar nav .transition{padding-left:1em}.doc-body .group-heading{font-weight:400;font-size:24px;line-height:32px;padding:10px 0;margin:20px 0}.doc-body .resource-heading{padding:10px 0;font-weight:400;font-size:24px;line-height:32px}.doc-body .transition-heading{color:#292e31;padding:10px 0;font-weight:400;font-size:24px;line-height:32px}ul.attrs,ul.params{border-top:1px solid #e1e8ed}.attrs .left,.attrs .right,.params .left,.params .right{display:inline-block;width:49.5%;vertical-align:top}.attrs .left,.params .left{text-align:right;padding-right:20px;box-sizing:border-box;font-size:13px;line-height:21px;word-break:break-all;white-space:normal}.attrs .right,.params .right{box-sizing:border-box;padding-left:10px}li.attr,li.param{padding:17px 0;border-bottom:1px solid #f0f4f7;line-height:24px}li.attr:last-child,li.param:last-child{border-bottom:none}.left{color:#aaa}.left span{padding-right:10px}.left .key{color:#000}.left span.key{font-weight:600}.left .type{font-style:italic;font-size:12px}.left .example{font-size:11px}.left .optional,.left .required{color:#e66e33;text-transform:uppercase;font-size:10px;font-weight:600}.show-child-attr{color:#0095dd;padding:6px 0}.child-attr{border-radius:5px}.child-attr>.attrs{display:none}.child-attr>.show-child-attr>.expand{display:block;cursor:pointer}.child-attr>.show-child-attr>.close{display:none;cursor:pointer}.child-attr.show{box-shadow:0 0 1px 0 rgba(128,128,128,.5)}.child-attr.show>.attrs{display:block}.child-attr.show>.show-child-attr>.expand{display:none}.child-attr.show>.show-child-attr>.close{display:block}.part-heading{color:#939da3;font-size:12px;font-weight:600;line-height:18px;text-transform:uppercase;margin:15px 0}.rhs-heading{margin-bottom:15px;font-weight:600;padding:6px 20px;font-size:13px}.rhs-heading.big{font-size:16px}.rhs-heading .status-code{padding:3px 6px;display:inline-block;background:#526269;border-radius:3px}.rhs-highlight{padding:0 20px;margin:20px;padding:20px 20px;background:#272b2d;border-radius:5px;margin-top:5px;margin-bottom:30px}.hljs{background:0 0!important}.code,code{font-family:'Source Code Pro',Menlo,monospace;font-size:13px}*{outline:0;box-sizing:border-box}body{-webkit-font-smoothing:antialiased;width:100%;height:100%;left:0;font-family:'Open Sans',sans-serif;cursor:default;transition:linear left .1s;margin:0;padding:0;font-weight:400;font-size:14px;color:#272b2d}a{text-decoration:none;color:inherit}ul{padding:0;list-style:none}h2{font-size:24px;font-weight:400;padding:10px 0}mark{background:0 0;border-radius:3px;color:#ff0}pre{margin:0}.top-header{position:absolute;top:0;left:270px;right:0;z-index:100;height:50px;background:0 0;overflow:hidden}.top-header .part-header{width:50%;display:inline-block;vertical-align:top;box-sizing:border-box}.top-header .lang-header{padding:10px 15px;position:absolute;left:50%;right:0;box-shadow:0 0 1px 0;background:#2d3134}.top-header .lang-header ul{margin:0}.top-header .lang-header ul>li{padding:3px 12px;margin-right:8px;border-radius:3px;cursor:pointer;border:1px solid #282c2f;color:#dde4e8;display:inline-block}.top-header .lang-header ul>li.selected{background:#272b2d;color:#45f945;font-weight:600}header{display:inline-block;width:100%;position:absolute;top:0;height:50px;z-index:5000;border-bottom:1px solid #f6f6f6;padding:8px 20px;font-size:22px}header h1{font-size:22px;margin:0}header h1 span{font-weight:300}.documentation{display:inline-block;width:100%;position:absolute;bottom:0;top:50px}.container{bottom:0;right:0;position:absolute;top:0;left:270px;z-index:50;box-sizing:border-box;overflow-x:hidden;overflow-y:auto}.doc-body{box-sizing:border-box;background-image:-webkit-linear-gradient(-90deg,#2d3134 50%,#fff 50%);background-image:linear-gradient(-90deg,#2d3134 50%,#fff 50%)}.header-anchor{visibility:hidden}.col-12{width:100%}.col-6{width:50%}.row{padding-bottom:50px}.row:after{clear:both;content:'';display:table}.lhs,.rhs{float:left;box-sizing:border-box}.lhs{padding:0 20px}.rhs{padding-top:40px;color:#dde4e8}</style>
+            </head>
     <body>
-        
-            <header>
+                    <header>
                 <h1>Polls <span>API</span></h1>
             </header>
         
-
         <div class="documentation">
             <div class="top-header">
                 <div class="lang-header part-header">
                     <ul>
-                        
-                            <li data-lang="bash">cURL</li>
-                        
-                            <li data-lang="javascript">NodeJS</li>
-                        
-                            <li data-lang="python">Python</li>
-                        
-                            <li data-lang="java">Java</li>
-                        
-                            <li data-lang="ruby">Ruby</li>
-                        
-                            <li data-lang="php">PHP</li>
-                        
-                            <li data-lang="go">Go</li>
-                        
-                        <li data-lang="none">None</li>
+                                                    <li data-lang="bash">cURL</li>
+                                                    <li data-lang="javascript">NodeJS</li>
+                                                    <li data-lang="python">Python</li>
+                                                    <li data-lang="java">Java</li>
+                                                    <li data-lang="ruby">Ruby</li>
+                                                    <li data-lang="php">PHP</li>
+                                                    <li data-lang="go">Go</li>
+                                                <li data-lang="none">None</li>
                     </ul>
                 </div>
             </div>
@@ -397,92 +39,70 @@ header h1 span {
                     </div>
 
                     
-                    
-                        
-                        <ul>
+                                                                    <ul>
                             
-                            
-                                <li class="resource-header">
+                                                            <li class="resource-header">
                                     <a href="#resource-polls-api-root" class="resource-nav-item">Polls API Root</a>
                                     <ul>
                                         
-                                        
-                                            <li class="transition">
+                                                                                    <li class="transition">
                                                 <a href="#transition-retrieve-the-entry-point-get" class="child-nav-item">
                                                     <span class="child-nav-text">Retrieve the Entry Point</span>
                                                 </a>
                                             </li>
-                                        
-                                    </ul>
+                                                                            </ul>
                                 </li>
-                            
-                        </ul>
-                    
-                        
-                            <div class="group-header">
+                                                    </ul>
+                                                                        <div class="group-header">
                                 <a href="#group-question">Question</a>
                             </div>
-                        
-                        <ul>
+                                                <ul>
                             
-                            
-                                <li class="resource-header">
+                                                            <li class="resource-header">
                                     <a href="#resource-question" class="resource-nav-item">Question</a>
                                     <ul>
                                         
-                                        
-                                            <li class="transition">
+                                                                                    <li class="transition">
                                                 <a href="#object-question" class="child-nav-item">
                                                     <span class="child-nav-text">Question Object</span>
                                                 </a>
                                             </li>
-                                        
-                                            <li class="transition">
+                                                                                    <li class="transition">
                                                 <a href="#transition-view-a-questions-detail-get" class="child-nav-item">
                                                     <span class="child-nav-text">View a Questions Detail</span>
                                                 </a>
                                             </li>
-                                        
-                                    </ul>
+                                                                            </ul>
                                 </li>
-                            
-                                <li class="resource-header">
+                                                            <li class="resource-header">
                                     <a href="#resource-choice" class="resource-nav-item">Choice</a>
                                     <ul>
                                         
-                                        
-                                            <li class="transition">
+                                                                                    <li class="transition">
                                                 <a href="#transition-vote-on-a-choice-post" class="child-nav-item">
                                                     <span class="child-nav-text">Vote on a Choice</span>
                                                 </a>
                                             </li>
-                                        
-                                    </ul>
+                                                                            </ul>
                                 </li>
-                            
-                                <li class="resource-header">
+                                                            <li class="resource-header">
                                     <a href="#resource-questions-collection" class="resource-nav-item">Questions Collection</a>
                                     <ul>
                                         
-                                        
-                                            <li class="transition">
+                                                                                    <li class="transition">
                                                 <a href="#transition-list-all-questions-get" class="child-nav-item">
                                                     <span class="child-nav-text">List All Questions</span>
                                                 </a>
                                             </li>
-                                        
-                                            <li class="transition">
+                                                                                    <li class="transition">
                                                 <a href="#transition-create-a-new-question-post" class="child-nav-item">
                                                     <span class="child-nav-text">Create a New Question</span>
                                                 </a>
                                             </li>
-                                        
-                                    </ul>
+                                                                            </ul>
                                 </li>
-                            
-                        </ul>
-                    
-                </nav>
+                                                    </ul>
+                                    </nav>
             </div>
 
             <div class="container">
@@ -491,42 +111,30 @@ header h1 span {
                     <div class="row">
                         <div class="col-6 lhs">
                             <div class="group-heading top" id="overview">Polls</div>
-                            
-                                <div class="description"><p>Polls is a simple API allowing consumers to view polls and vote in them. You can view this documentation over at <a href="http://docs.pollsapi.apiary.io">Apiary</a>.</p>
+                                                            <div class="description"><p>Polls is a simple API allowing consumers to view polls and vote in them. You can view this documentation over at <a href="http://docs.pollsapi.apiary.io">Apiary</a>.</p>
 </div>
-                            
-                        </div>
+                                                    </div>
                     </div>
 
                     
-                    
+                                            
                         
-
-                        
-                        
-                            <div class="row">
+                                                    <div class="row">
                                 <div class="col-6 lhs">
                                     <div class="resource-heading way-point" id="resource-polls-api-root">Polls API Root</div>
-                                    
-                                        <div class="description"><p>This resource does not have any attributes. Instead it offers the initial API affordances in the form of the links in the JSON body.</p>
+                                                                            <div class="description"><p>This resource does not have any attributes. Instead it offers the initial API affordances in the form of the links in the JSON body.</p>
 <p>It is recommend to follow the “url” link values, <a href="https://tools.ietf.org/html/rfc5988">Link</a> or Location headers where applicable to retrieve resources. Instead of constructing your own URLs, to keep your client decoupled from implementation details.</p>
 </div>
-                                    
-                                </div>
+                                                                    </div>
                                 <div class="col-6 rhs"></div>
                             </div>
 
                             
-                            
-                                
-                                    <div class="row">
+                                                                                                <div class="row">
                                         
                                         <div class="col-6 lhs">
                                             <div class="transition-heading way-point" id="transition-retrieve-the-entry-point-get">Retrieve the Entry Point</div>
-                                            
-                                            
-                                            
-                                        </div>
+                                                                                                                                                                            </div>
 
                                         
                                         <div class="col-6 rhs">
@@ -545,13 +153,10 @@ header h1 span {
 
                                             
                                             
-
                                             
                                             
-
                                             
-                                            
-                                                <div class="sample-request" style="display: none">
+                                                                                            <div class="sample-request" style="display:none">
                                                     <div class="rhs-heading">Example Request</div>
                                                     <div class="rhs-highlight"><pre><code class="bash">curl --request GET \
   --url http://polls.apiblueprint.org/</code></pre><pre><code class="javascript">var http = require(&quot;http&quot;);
@@ -645,88 +250,60 @@ func main() {
 }</code></pre></div>
                                                 </div>
                                             
-
                                             
                                             <div class="sample-response">
-                                                
-                                                    <div class="rhs-heading big">
+                                                                                                    <div class="rhs-heading big">
                                                         <span>Response&nbsp;</span>
                                                         <span class="status-code">200</span>
                                                     </div>
 
                                                     
-                                                    
-                                                        <div class="headers">
+                                                                                                            <div class="headers">
                                                             <div class="rhs-heading">Response Headers</div>
                                                             <div class="rhs-highlight code">
                                                                 <div class="hljs">
-                                                                    
-                                                                        <span class="hljs-attribute">Content-Type</span>: application/json 
-                                                                    
-                                                                </div>
+                                                                                                                                            <span class="hljs-attribute">Content-Type</span>: application/json                                                                                                                                     </div>
                                                             </div>
                                                         </div>
                                                     
-
                                                     
-                                                    
-                                                        <div class="rhs-heading">Response Body</div>
+                                                                                                            <div class="rhs-heading">Response Body</div>
                                                         <div class="rhs-highlight">
                                                             <pre><code>{
     &quot;questions_url&quot;: &quot;/questions&quot;
 }
 </code></pre>
                                                         </div>
-                                                    
-                                                
-                                            </div>
+                                                                                                                                                </div>
                                         </div>
                                     </div>
-                                
-                            
-                        
-                    
-                        
-                            <div class="row">
+                                                                                                                                                            <div class="row">
                                 <div class="col-6 lhs">
                                     <div class="group-heading way-point" id="group-question">Question</div>
-                                    
-                                        <div class="description"><p>Resources related to questions in the API.</p>
+                                                                            <div class="description"><p>Resources related to questions in the API.</p>
 </div>
-                                    
-                                </div>
+                                                                    </div>
                                 <div class="col-6 rhs"></div>
                             </div>
                         
-
                         
-                        
-                            <div class="row">
+                                                    <div class="row">
                                 <div class="col-6 lhs">
                                     <div class="resource-heading way-point" id="resource-question">Question</div>
-                                    
-                                        <div class="description"><p>A Question object has the following attributes:</p>
+                                                                            <div class="description"><p>A Question object has the following attributes:</p>
 </div>
-                                    
-                                </div>
+                                                                    </div>
                                 <div class="col-6 rhs"></div>
                             </div>
 
                             
-                            
-                                
-                                    <div class="row">
+                                                                                                <div class="row">
                                         <div class="col-6 lhs">
                                             <div class="transition-heading way-point" id="object-question">Question Object</div>
                                             <h5 class="part-heading">Attributes</h5>
-                                            
-    
-    
+                                                    
         <ul class="attrs">
-            
-                
-                    
-                    <li class="attr">
+                                                                    <li class="attr">
                         
                         <div class="left">
                             <div>
@@ -735,48 +312,33 @@ func main() {
                             </div>
                             <div>
                                 
-                                
-                                    <span class="type">object</span>
-                                
-
+                                                                    <span class="type">object</span>
                                 
                                 
                                 
-                            </div>
+                                                            </div>
                             <div>
                                 
                                 
-
                                 
-                                
-                            </div>
+                                                            </div>
                         </div>
 
                         
                         <div class="right">
-                            
-                        </div>
+                                                    </div>
 
                         
-                        
-                            
-                            
+                                                                                
                                 <div class="child-attr">
                                     <div class="show-child-attr left">
-                                        
-                                            <span class="expand">Expand attributes</span>
+                                                                                    <span class="expand">Expand attributes</span>
                                             <span class="close">Close attributes</span>
-                                        
-                                    </div>
+                                                                            </div>
 
-                                    
-    
-    
+                                            
         <ul class="attrs">
-            
-                
-                    
-                    <li class="attr">
+                                                                    <li class="attr">
                         
                         <div class="left">
                             <div>
@@ -785,48 +347,30 @@ func main() {
                             </div>
                             <div>
                                 
-                                
-                                    <span class="type">number</span>
-                                
-
+                                                                    <span class="type">number</span>
                                 
                                 
                                 
-                                    <span class="required">Required</span>
-                                
-                            </div>
+                                                                    <span class="required">Required</span>
+                                                            </div>
                             <div>
                                 
                                 
-
                                 
                                  
                                     <span class="example">Example: 1</span>
-                                
-                            </div>
+                                                            </div>
                         </div>
 
                         
                         <div class="right">
-                            
-                                <span class="description">ID of the Question in form of an integer</span>
-                            
-                        </div>
+                                                            <span class="description">ID of the Question in form of an integer</span>
+                                                    </div>
 
                         
-                        
-                            
-                            
-                                
-                                
-                            
-                        
-                    </li>
-                
-            
-                
-                    
-                    <li class="attr">
+                                                                                
+                                                                                                                                        </li>
+                                                                                    <li class="attr">
                         
                         <div class="left">
                             <div>
@@ -835,57 +379,34 @@ func main() {
                             </div>
                             <div>
                                 
-                                
-                                    <span class="type">number</span>
-                                
-
+                                                                    <span class="type">number</span>
                                 
                                 
                                 
-                                    <span class="required">Required</span>
-                                
-                            </div>
+                                                                    <span class="required">Required</span>
+                                                            </div>
                             <div>
                                 
                                 
-
                                 
                                  
                                     <span class="example">Example: 1</span>
-                                
-                            </div>
+                                                            </div>
                         </div>
 
                         
                         <div class="right">
-                            
-                                <span class="description">ID of the Choice in form of an integer</span>
-                            
-                        </div>
+                                                            <span class="description">ID of the Choice in form of an integer</span>
+                                                    </div>
 
                         
-                        
-                            
-                            
-                                
-                                
-                            
-                        
-                    </li>
-                
-            
-        </ul>
+                                                                                
+                                                                                                                                        </li>
+                                    </ul>
     
-
                                 </div>
-                            
-                        
-                    </li>
-                
-            
-                
-                    
-                    <li class="attr">
+                                                                        </li>
+                                                                                    <li class="attr">
                         
                         <div class="left">
                             <div>
@@ -894,44 +415,27 @@ func main() {
                             </div>
                             <div>
                                 
-                                
-                                    <span class="type">string</span>
-                                
-
+                                                                    <span class="type">string</span>
                                 
                                 
                                 
-                            </div>
+                                                            </div>
                             <div>
                                 
                                 
-
                                 
-                                
-                            </div>
+                                                            </div>
                         </div>
 
                         
                         <div class="right">
-                            
-                                <span class="description">An ISO8601 date when the question was published.</span>
-                            
-                        </div>
+                                                            <span class="description">An ISO8601 date when the question was published.</span>
+                                                    </div>
 
                         
-                        
-                            
-                            
-                                
-                                
-                            
-                        
-                    </li>
-                
-            
-                
-                    
-                    <li class="attr">
+                                                                                
+                                                                                                                                        </li>
+                                                                                    <li class="attr">
                         
                         <div class="left">
                             <div>
@@ -940,42 +444,26 @@ func main() {
                             </div>
                             <div>
                                 
-                                
-                                    <span class="type">string</span>
-                                
-
+                                                                    <span class="type">string</span>
                                 
                                 
                                 
-                            </div>
+                                                            </div>
                             <div>
                                 
                                 
-
                                 
-                                
-                            </div>
+                                                            </div>
                         </div>
 
                         
                         <div class="right">
-                            
-                        </div>
+                                                    </div>
 
                         
-                        
-                            
-                            
-                                
-                                
-                            
-                        
-                    </li>
-                
-            
-                
-                    
-                    <li class="attr">
+                                                                                
+                                                                                                                                        </li>
+                                                                                    <li class="attr">
                         
                         <div class="left">
                             <div>
@@ -984,90 +472,55 @@ func main() {
                             </div>
                             <div>
                                 
-                                
-                                    <span class="type">string</span>
-                                
-
+                                                                    <span class="type">string</span>
                                 
                                 
                                 
-                            </div>
+                                                            </div>
                             <div>
                                 
                                 
-
                                 
-                                
-                            </div>
+                                                            </div>
                         </div>
 
                         
                         <div class="right">
-                            
-                                <span class="description">An array of Choice objects.</span>
-                            
-                        </div>
+                                                            <span class="description">An array of Choice objects.</span>
+                                                    </div>
 
                         
-                        
-                            
-                            
-                                
-                                
-                            
-                        
-                    </li>
-                
-            
-        </ul>
+                                                                                
+                                                                                                                                        </li>
+                                    </ul>
     
-
                                         </div>
                                         <div class="col-6 rhs"></div>
                                     </div>
-                                
-                            
-                                
-                                    <div class="row">
+                                                                                                                                <div class="row">
                                         
                                         <div class="col-6 lhs">
                                             <div class="transition-heading way-point" id="transition-view-a-questions-detail-get">View a Questions Detail</div>
-                                            
-                                            
-                                                <h5 class="part-heading">URL Parameters</h5>
-                                                
-    
-        <ul class="params">
-            
-                <li class="param">
+                                                                                                                                        <h5 class="part-heading">URL Parameters</h5>
+                                                            <ul class="params">
+                            <li class="param">
                     <div class="left">
-                        
-                            <div>
+                                                    <div>
                                 <span class="key">question_id</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="type">string</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="example">Example: 1</span>
                             </div>
-                        
-                    </div>
+                                            </div>
                     <div class="right">
-                        
-                    </div>
+                                            </div>
                 </li>
-            
-        </ul>
+                    </ul>
     
-
-                                            
-                                            
-                                        </div>
+                                                                                                                                </div>
 
                                         
                                         <div class="col-6 rhs">
@@ -1086,13 +539,10 @@ func main() {
 
                                             
                                             
-
                                             
                                             
-
                                             
-                                            
-                                                <div class="sample-request" style="display: none">
+                                                                                            <div class="sample-request" style="display:none">
                                                     <div class="rhs-heading">Example Request</div>
                                                     <div class="rhs-highlight"><pre><code class="bash">curl --request GET \
   --url http://polls.apiblueprint.org/questions/1</code></pre><pre><code class="javascript">var http = require(&quot;http&quot;);
@@ -1186,32 +636,24 @@ func main() {
 }</code></pre></div>
                                                 </div>
                                             
-
                                             
                                             <div class="sample-response">
-                                                
-                                                    <div class="rhs-heading big">
+                                                                                                    <div class="rhs-heading big">
                                                         <span>Response&nbsp;</span>
                                                         <span class="status-code">200</span>
                                                     </div>
 
                                                     
-                                                    
-                                                        <div class="headers">
+                                                                                                            <div class="headers">
                                                             <div class="rhs-heading">Response Headers</div>
                                                             <div class="rhs-highlight code">
                                                                 <div class="hljs">
-                                                                    
-                                                                        <span class="hljs-attribute">Content-Type</span>: application/json 
-                                                                    
-                                                                </div>
+                                                                                                                                            <span class="hljs-attribute">Content-Type</span>: application/json                                                                                                                                     </div>
                                                             </div>
                                                         </div>
                                                     
-
                                                     
-                                                    
-                                                        <div class="rhs-heading">Response Body</div>
+                                                                                                            <div class="rhs-heading">Response Body</div>
                                                         <div class="rhs-highlight">
                                                             <pre><code>{
     &quot;question&quot;: &quot;Favourite programming language?&quot;,
@@ -1239,88 +681,56 @@ func main() {
 }
 </code></pre>
                                                         </div>
-                                                    
-                                                
-                                            </div>
+                                                                                                                                                </div>
                                         </div>
                                     </div>
-                                
-                            
-                        
-                            <div class="row">
+                                                                                                                <div class="row">
                                 <div class="col-6 lhs">
                                     <div class="resource-heading way-point" id="resource-choice">Choice</div>
-                                    
-                                </div>
+                                                                    </div>
                                 <div class="col-6 rhs"></div>
                             </div>
 
                             
-                            
-                                
-                                    <div class="row">
+                                                                                                <div class="row">
                                         
                                         <div class="col-6 lhs">
                                             <div class="transition-heading way-point" id="transition-vote-on-a-choice-post">Vote on a Choice</div>
-                                            
-                                            
-                                                <h5 class="part-heading">URL Parameters</h5>
-                                                
-    
-        <ul class="params">
-            
-                <li class="param">
+                                                                                                                                        <h5 class="part-heading">URL Parameters</h5>
+                                                            <ul class="params">
+                            <li class="param">
                     <div class="left">
-                        
-                            <div>
+                                                    <div>
                                 <span class="key">question_id</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="type">string</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="example">Example: 1</span>
                             </div>
-                        
-                    </div>
+                                            </div>
                     <div class="right">
-                        
-                    </div>
+                                            </div>
                 </li>
-            
-                <li class="param">
+                            <li class="param">
                     <div class="left">
-                        
-                            <div>
+                                                    <div>
                                 <span class="key">choice_id</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="type">string</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="example">Example: 1</span>
                             </div>
-                        
-                    </div>
+                                            </div>
                     <div class="right">
-                        
-                    </div>
+                                            </div>
                 </li>
-            
-        </ul>
+                    </ul>
     
-
-                                            
-                                            
-                                        </div>
+                                                                                                                                </div>
 
                                         
                                         <div class="col-6 rhs">
@@ -1339,13 +749,10 @@ func main() {
 
                                             
                                             
-
                                             
                                             
-
                                             
-                                            
-                                                <div class="sample-request" style="display: none">
+                                                                                            <div class="sample-request" style="display:none">
                                                     <div class="rhs-heading">Example Request</div>
                                                     <div class="rhs-highlight"><pre><code class="bash">curl --request POST \
   --url http://polls.apiblueprint.org/questions/1/choices/1</code></pre><pre><code class="javascript">var http = require(&quot;http&quot;);
@@ -1439,89 +846,58 @@ func main() {
 }</code></pre></div>
                                                 </div>
                                             
-
                                             
                                             <div class="sample-response">
-                                                
-                                                    <div class="rhs-heading big">
+                                                                                                    <div class="rhs-heading big">
                                                         <span>Response&nbsp;</span>
                                                         <span class="status-code">201</span>
                                                     </div>
 
                                                     
-                                                    
-                                                        <div class="headers">
+                                                                                                            <div class="headers">
                                                             <div class="rhs-heading">Response Headers</div>
                                                             <div class="rhs-highlight code">
                                                                 <div class="hljs">
-                                                                    
-                                                                        <span class="hljs-attribute">Location</span>: /questions/1 
-                                                                    
-                                                                </div>
+                                                                                                                                            <span class="hljs-attribute">Location</span>: /questions/1                                                                                                                                     </div>
                                                             </div>
                                                         </div>
                                                     
-
                                                     
-                                                    
-                                                
-                                            </div>
+                                                                                                                                                </div>
                                         </div>
                                     </div>
-                                
-                            
-                        
-                            <div class="row">
+                                                                                                                <div class="row">
                                 <div class="col-6 lhs">
                                     <div class="resource-heading way-point" id="resource-questions-collection">Questions Collection</div>
-                                    
-                                </div>
+                                                                    </div>
                                 <div class="col-6 rhs"></div>
                             </div>
 
                             
-                            
-                                
-                                    <div class="row">
+                                                                                                <div class="row">
                                         
                                         <div class="col-6 lhs">
                                             <div class="transition-heading way-point" id="transition-list-all-questions-get">List All Questions</div>
-                                            
-                                            
-                                                <h5 class="part-heading">URL Parameters</h5>
-                                                
-    
-        <ul class="params">
-            
-                <li class="param">
+                                                                                                                                        <h5 class="part-heading">URL Parameters</h5>
+                                                            <ul class="params">
+                            <li class="param">
                     <div class="left">
-                        
-                            <div>
+                                                    <div>
                                 <span class="key">page</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="type">string</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="example">Example: 1</span>
                             </div>
-                        
-                    </div>
+                                            </div>
                     <div class="right">
-                        
-                    </div>
+                                            </div>
                 </li>
-            
-        </ul>
+                    </ul>
     
-
-                                            
-                                            
-                                        </div>
+                                                                                                                                </div>
 
                                         
                                         <div class="col-6 rhs">
@@ -1540,13 +916,10 @@ func main() {
 
                                             
                                             
-
                                             
                                             
-
                                             
-                                            
-                                                <div class="sample-request" style="display: none">
+                                                                                            <div class="sample-request" style="display:none">
                                                     <div class="rhs-heading">Example Request</div>
                                                     <div class="rhs-highlight"><pre><code class="bash">curl --request GET \
   --url &#39;http://polls.apiblueprint.org/questions?page={page}&#39;</code></pre><pre><code class="javascript">var http = require(&quot;http&quot;);
@@ -1640,34 +1013,24 @@ func main() {
 }</code></pre></div>
                                                 </div>
                                             
-
                                             
                                             <div class="sample-response">
-                                                
-                                                    <div class="rhs-heading big">
+                                                                                                    <div class="rhs-heading big">
                                                         <span>Response&nbsp;</span>
                                                         <span class="status-code">200</span>
                                                     </div>
 
                                                     
-                                                    
-                                                        <div class="headers">
+                                                                                                            <div class="headers">
                                                             <div class="rhs-heading">Response Headers</div>
                                                             <div class="rhs-highlight code">
                                                                 <div class="hljs">
-                                                                    
-                                                                        <span class="hljs-attribute">Content-Type</span>: application/json <br />
-                                                                    
-                                                                        <span class="hljs-attribute">Link</span>: &lt;/questions?page=2&gt;; rel=&quot;next&quot; 
-                                                                    
-                                                                </div>
+                                                                                                                                            <span class="hljs-attribute">Content-Type</span>: application/json <br>                                                                                                                                            <span class="hljs-attribute">Link</span>: &lt;/questions?page=2&gt;; rel=&quot;next&quot;                                                                                                                                     </div>
                                                             </div>
                                                         </div>
                                                     
-
                                                     
-                                                    
-                                                        <div class="rhs-heading">Response Body</div>
+                                                                                                            <div class="rhs-heading">Response Body</div>
                                                         <div class="rhs-highlight">
                                                             <pre><code>[
     {
@@ -1697,54 +1060,33 @@ func main() {
 ]
 </code></pre>
                                                         </div>
-                                                    
-                                                
-                                            </div>
+                                                                                                                                                </div>
                                         </div>
                                     </div>
-                                
-                            
-                                
-                                    <div class="row">
+                                                                                                                                <div class="row">
                                         
                                         <div class="col-6 lhs">
                                             <div class="transition-heading way-point" id="transition-create-a-new-question-post">Create a New Question</div>
-                                            
-                                            
-                                                <h5 class="part-heading">URL Parameters</h5>
-                                                
-    
-        <ul class="params">
-            
-                <li class="param">
+                                                                                                                                        <h5 class="part-heading">URL Parameters</h5>
+                                                            <ul class="params">
+                            <li class="param">
                     <div class="left">
-                        
-                            <div>
+                                                    <div>
                                 <span class="key">page</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="type">string</span>
                             </div>
-                        
-                        
-                            <div>
+                                                                            <div>
                                 <span class="example">Example: 1</span>
                             </div>
-                        
-                    </div>
+                                            </div>
                     <div class="right">
-                        
-                    </div>
+                                            </div>
                 </li>
-            
-        </ul>
+                    </ul>
     
-
-                                            
-                                            
-                                        </div>
+                                                                                                                                </div>
 
                                         
                                         <div class="col-6 rhs">
@@ -1762,18 +1104,15 @@ func main() {
                                             <div class="rhs-heading big">Request</div>
 
                                             
-                                            
-                                                <div class="headers">
+                                                                                            <div class="headers">
                                                     <div class="rhs-heading">Request Headers</div>
                                                     <div class="rhs-highlight code">
                                                         <div class="hljs"><span class="hljs-attribute">Content-Type</span>: application/json</div>
                                                     </div>
                                                 </div>
                                             
-
                                             
-                                            
-                                                <div class="rhs-heading">Request Body</div>
+                                                                                            <div class="rhs-heading">Request Body</div>
                                                 <div class="rhs-highlight">
                                                     <pre><code>{
     &quot;question&quot;: &quot;Favourite programming language?&quot;,
@@ -1787,10 +1126,8 @@ func main() {
 </code></pre>
                                                 </div>
                                             
-
                                             
-                                            
-                                                <div class="sample-request" style="display: none">
+                                                                                            <div class="sample-request" style="display:none">
                                                     <div class="rhs-heading">Example Request</div>
                                                     <div class="rhs-highlight"><pre><code class="bash">curl --request POST \
   --url &#39;http://polls.apiblueprint.org/questions?page={page}&#39; \
@@ -1896,34 +1233,24 @@ func main() {
 }</code></pre></div>
                                                 </div>
                                             
-
                                             
                                             <div class="sample-response">
-                                                
-                                                    <div class="rhs-heading big">
+                                                                                                    <div class="rhs-heading big">
                                                         <span>Response&nbsp;</span>
                                                         <span class="status-code">201</span>
                                                     </div>
 
                                                     
-                                                    
-                                                        <div class="headers">
+                                                                                                            <div class="headers">
                                                             <div class="rhs-heading">Response Headers</div>
                                                             <div class="rhs-highlight code">
                                                                 <div class="hljs">
-                                                                    
-                                                                        <span class="hljs-attribute">Content-Type</span>: application/json <br />
-                                                                    
-                                                                        <span class="hljs-attribute">Location</span>: /questions/2 
-                                                                    
-                                                                </div>
+                                                                                                                                            <span class="hljs-attribute">Content-Type</span>: application/json <br>                                                                                                                                            <span class="hljs-attribute">Location</span>: /questions/2                                                                                                                                     </div>
                                                             </div>
                                                         </div>
                                                     
-
                                                     
-                                                    
-                                                        <div class="rhs-heading">Response Body</div>
+                                                                                                            <div class="rhs-heading">Response Body</div>
                                                         <div class="rhs-highlight">
                                                             <pre><code>{
     &quot;question&quot;: &quot;Favourite programming language?&quot;,
@@ -1951,16 +1278,10 @@ func main() {
 }
 </code></pre>
                                                         </div>
-                                                    
-                                                
-                                            </div>
+                                                                                                                                                </div>
                                         </div>
                                     </div>
-                                
-                            
-                        
-                    
-                </div>
+                                                                                                                        </div>
             </div>
         </div>
 
@@ -1969,123 +1290,6 @@ func main() {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" integrity="sha256-/BfiIkHlHoVihZdc6TFuj7MmJ0TWcWsMXkeDFwhi0zw=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/http.min.js" integrity="sha256-ze9TA1yfIP6jEh7+8fVq8CxHsydquQNe9O+P05ueO3w=" crossorigin="anonymous"></script>
 
-        <script type="text/javascript">
-            hljs.initHighlightingOnLoad();
-
-            /**
-             * Set selected navigation item and expand parents (if any)
-             * @param {element} clicked navigation element
-             */
-            function setSelection(el) {
-                if ($(el).hasClass('resource-nav-item')) {
-                    $('.sidebar .resource-header.expand').removeClass('expand');
-                    $(el).parent().addClass('expand');
-                } else if ($(el).hasClass('child-nav-item')) {
-                    $('.sidebar .child-nav-item.selected').removeClass('selected');
-                    $(el).addClass('selected');
-                    $(el).parents('.resource-header').addClass('expand');
-                } else if ($(el).parent().hasClass('group-header')) {
-                    $('.sidebar .resource-header.expand').removeClass('expand');
-                    $('.sidebar .child-nav-item.selected').removeClass('selected');
-                }
-            }
-
-            /**
-             * Restore scroll position on (re)load
-             */
-            function restoreScroll(offset) {
-                var lastScroll = sessionStorage && sessionStorage.getItem('lastScroll');
-
-                if (lastScroll) {
-                    $('.container').scrollTop(lastScroll);
-                    return;
-                }
-
-                // Location hash (fix scrolling)
-                if (window.location.hash) {
-                    var scrollEl = $(window.location.hash);
-
-                    if (scrollEl.length) {
-                        // Scroll document container
-                        $('.container').scrollTop($(scrollEl).offset().top - offset);
-
-                        // Activate menu element
-                        setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
-                    }
-                }
-            }
-
-            $(function() {
-                var headerHeight = $('.documentation').offset().top || 50;
-
-                // Child attributes hide/show
-                $('.doc-body .show-child-attr > span').on('click', function(e) {
-                    var parent = e.target.parentNode.parentNode;
-
-                    if ($(e.target).hasClass('expand') || $(e.target).hasClass('close')) {
-                        $(parent).toggleClass('show');
-                    }
-                });
-
-                // Slidebar click handler
-                $('.sidebar a').on('click', function(e) {
-                    setSelection(e.target);
-                });
-
-                // Language bar click handler
-                $('.top-header .lang-header [data-lang]').on('click', function(e) {
-                    if ($(e.target).data('lang') === 'none') {
-                        $('.sample-request').hide();
-                    } else {
-                        $('.sample-request').show();
-                    }
-
-                    $('.top-header .lang-header [data-lang]').removeClass('selected');
-                    $(e.target).addClass('selected');
-
-                    $('.sample-request code').hide();
-                    $('.sample-request code[class~="' + $(e.target).data('lang') + '"]').show();
-
-                    sessionStorage && sessionStorage.setItem('exampleLang', $(e.target).data('lang'));
-                });
-
-                // Active language on load
-                if ($('.top-header .lang-header [data-lang]')) {
-                    var lastLang = sessionStorage.getItem('exampleLang');
-                    var selected = $('.top-header .lang-header [data-lang="' + lastLang + '"]');
-
-                    if (selected.length === 0) {
-                        selected = $('.top-header .lang-header [data-lang]')[0];
-                    }
-
-                    if ($(selected).data('lang') == 'none') {
-                        $('.sample-request').hide();
-                    } else {
-                        $('.sample-request').show();
-                    }
-
-                    $(selected).addClass('selected');
-                    $('.sample-request code').hide();
-                    $('.sample-request code[class~="' + $(selected).data('lang') + '"]').show();
-                }
-
-                // Waypoints
-                $('.way-point[id]').waypoint({
-                    continuous: false,
-                    context: $('.container'),
-                    handler: function(direction) {
-                        setSelection($('.sidebar a[href=\"#' + this.element.id + '\"]'));
-                    }
-                });
-
-                // Restore scroll position
-                restoreScroll(headerHeight);
-
-                // Save scroll position
-                $(window).on('beforeunload', function(e) {
-                    sessionStorage && sessionStorage.setItem('lastScroll', $('.container').scrollTop());
-                });
-            });
-        </script>
+        <script type="text/javascript">function setSelection(e){$(e).hasClass("resource-nav-item")?($(".sidebar .resource-header.expand").removeClass("expand"),$(e).parent().addClass("expand")):$(e).hasClass("child-nav-item")?($(".sidebar .child-nav-item.selected").removeClass("selected"),$(e).addClass("selected"),$(e).parents(".resource-header").addClass("expand")):$(e).parent().hasClass("group-header")&&($(".sidebar .resource-header.expand").removeClass("expand"),$(".sidebar .child-nav-item.selected").removeClass("selected"))}function restoreScroll(e){var a=sessionStorage&&sessionStorage.getItem("lastScroll");if(a)$(".container").scrollTop(a);else if(window.location.hash){var s=$(window.location.hash);s.length&&($(".container").scrollTop($(s).offset().top-e),setSelection($('.sidebar a[href="'+window.location.hash+'"]')))}}hljs.initHighlightingOnLoad(),$(function(){var e=$(".documentation").offset().top||50;if($(".doc-body .show-child-attr > span").on("click",function(e){var a=e.target.parentNode.parentNode;($(e.target).hasClass("expand")||$(e.target).hasClass("close"))&&$(a).toggleClass("show")}),$(".sidebar a").on("click",function(e){setSelection(e.target)}),$(".top-header .lang-header [data-lang]").on("click",function(e){"none"===$(e.target).data("lang")?$(".sample-request").hide():$(".sample-request").show(),$(".top-header .lang-header [data-lang]").removeClass("selected"),$(e.target).addClass("selected"),$(".sample-request code").hide(),$('.sample-request code[class~="'+$(e.target).data("lang")+'"]').show(),sessionStorage&&sessionStorage.setItem("exampleLang",$(e.target).data("lang"))}),$(".top-header .lang-header [data-lang]")){var a=sessionStorage.getItem("exampleLang"),s=$('.top-header .lang-header [data-lang="'+a+'"]');0===s.length&&(s=$(".top-header .lang-header [data-lang]")[0]),"none"==$(s).data("lang")?$(".sample-request").hide():$(".sample-request").show(),$(s).addClass("selected"),$(".sample-request code").hide(),$('.sample-request code[class~="'+$(s).data("lang")+'"]').show()}$(".way-point[id]").waypoint({continuous:!1,context:$(".container"),handler:function(e){setSelection($('.sidebar a[href="#'+this.element.id+'"]'))}}),restoreScroll(e),$(window).on("beforeunload",function(e){sessionStorage&&sessionStorage.setItem("lastScroll",$(".container").scrollTop())})})</script>
     </body>
 </html>

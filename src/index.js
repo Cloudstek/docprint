@@ -47,6 +47,10 @@ var _nunjucks = require('nunjucks');
 
 var _nunjucks2 = _interopRequireDefault(_nunjucks);
 
+var _htmlMinifier = require('html-minifier');
+
+var _htmlMinifier2 = _interopRequireDefault(_htmlMinifier);
+
 var _less = require('less');
 
 var _less2 = _interopRequireDefault(_less);
@@ -74,27 +78,19 @@ exports.default = (() => {
         options.template = options.template || _path2.default.join(__dirname, 'templates', 'default', 'default.njk');
 
         const transcludeFile = (0, _promisifyEs2.default)(_hercule.transcludeFile);
-        const drafter = (0, _promisifyEs2.default)(_drafter3.default);
+        const drafter = (0, _promisifyEs2.default)(_drafter3.default.parse);
 
         if (options.css) {
-            if (options.css.endsWith('.css')) {
-                customCss = _fsExtra2.default.readFileSync(options.css, 'utf8');
-            } else {
-                customCss = options.css;
-            }
+            customCss = _fsExtra2.default.readFileSync(options.css, 'utf8');
         }
 
         if (options.header) {
-            if (options.header.endsWith('.html') || options.header.endsWith('.htm')) {
-                customHeader = _fsExtra2.default.readFileSync(options.header, 'utf8');
-            } else {
-                customHeader = options.header;
-            }
+            customHeader = _fsExtra2.default.readFileSync(options.header, 'utf8');
         }
 
         let result;
         result = yield transcludeFile(options.filepath);
-        result = yield drafter.parse(result, {
+        result = yield drafter(result, {
             requireBlueprintName: true
         });
 
@@ -106,7 +102,9 @@ exports.default = (() => {
 
         let dataStructures = parser.getDataStructures(output);
 
-        let env = _nunjucks2.default.configure(_path2.default.dirname(options.template));
+        let env = _nunjucks2.default.configure(_path2.default.dirname(options.template), {
+            trimBlocks: true
+        });
 
         env = addFilters(env, options);
 
@@ -115,11 +113,18 @@ exports.default = (() => {
             groups: output.content.content,
             title: output.content.title,
             description: output.content.description,
-            css: customCss,
-            header: customHeader,
+            customCss: customCss,
+            customHeader: customHeader,
             dataStructures: dataStructures,
             languages: parser.getLanguages()
         });
+
+        if (options.minify === true) {
+            res = _htmlMinifier2.default.minify(res, {
+                minifyCSS: true,
+                minifyJS: true
+            });
+        }
 
         _fsExtra2.default.ensureDirSync(options.destination);
         _fsExtra2.default.writeFileSync(_path2.default.join(options.destination, 'index.html'), res);

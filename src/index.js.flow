@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import promisify from 'promisify-es6';
 import path from 'path';
 import nunjucks from 'nunjucks';
+import minifier from 'html-minifier';
 
 import less from 'less';
 import _drafter from 'drafter';
@@ -25,30 +26,22 @@ export default async (options: Object = {}) => {
 
     // Promisify
     const transcludeFile = promisify(_transcludeFile);
-    const drafter = promisify(_drafter);
+    const drafter = promisify(_drafter.parse);
 
     // Custom CSS
     if (options.css) {
-        if (options.css.endsWith('.css')) {
-            customCss = fs.readFileSync(options.css, 'utf8');
-        } else {
-            customCss = options.css;
-        }
+        customCss = fs.readFileSync(options.css, 'utf8');
     }
 
     // Custom header
     if (options.header) {
-        if (options.header.endsWith('.html') || options.header.endsWith('.htm')) {
-            customHeader = fs.readFileSync(options.header, 'utf8');
-        } else {
-            customHeader = options.header;
-        }
+        customHeader = fs.readFileSync(options.header, 'utf8');
     }
 
     // Transclude
     let result: string;
     result = await transcludeFile(options.filepath);
-    result = await drafter.parse(result, {
+    result = await drafter(result, {
         requireBlueprintName: true
     });
 
@@ -63,7 +56,9 @@ export default async (options: Object = {}) => {
     let dataStructures = parser.getDataStructures(output);
 
     // Nunjucks
-    let env = nunjucks.configure(path.dirname(options.template));
+    let env = nunjucks.configure(path.dirname(options.template), {
+        trimBlocks: true
+    });
 
     // Add Nunjucks filters
     env = addFilters(env, options);
@@ -74,11 +69,19 @@ export default async (options: Object = {}) => {
         groups: output.content.content,
         title: output.content.title,
         description: output.content.description,
-        css: customCss,
-        header: customHeader,
+        customCss: customCss,
+        customHeader: customHeader,
         dataStructures: dataStructures,
         languages: parser.getLanguages()
     });
+
+    // Minify HTML / CSS / JS
+    if (options.minify === true) {
+        res = minifier.minify(res, {
+            minifyCSS: true,
+            minifyJS: true
+        });
+    }
 
     // Save
     fs.ensureDirSync(options.destination);
@@ -101,6 +104,13 @@ function getHost(doc: Object): ?string {
     }
 }
 
+/**
+ * Render nunjucks template
+ * @param {Object} env Nunjucks environment
+ * @param {string} template Template file
+ * @param {Object} context Template context
+ * @return {Promise}
+ */
 async function renderTemplate(env, template, context) {
     return new Promise((resolve, reject) => {
         env.render(template, context, (err, res) => {
@@ -114,6 +124,11 @@ async function renderTemplate(env, template, context) {
     });
 }
 
+/**
+ * Add filters to nunjucks environmment
+ * @param {Object} env Nunjucks environment
+ * @param {Object} options Program options
+ */
 function addFilters(env, options) {
     // Find property in object
     env.addFilter('find', (obj, property, value) => {

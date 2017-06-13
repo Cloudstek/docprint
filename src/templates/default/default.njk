@@ -12,13 +12,15 @@
         <style type="text/css">
             {{ 'less/style.less' | less | safe }}
         </style>
-        <style type="text/css">
-            {{ css | safe }}
-        </style>
+        {% if customCss %}
+            <style type="text/css">
+                {{ customCss | less | safe }}
+            </style>
+        {% endif %}
     </head>
     <body>
-        {% if header %}
-            {{ header | safe }}
+        {% if customHeader %}
+            {{ customHeader | safe }}
         {% else %}
             <header>
                 <h1>{{ title | capitalize }} <span>API</span></h1>
