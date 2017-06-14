@@ -4,8 +4,13 @@
     <head>
         <meta charset="utf-8">
 
+        <meta name="theme-color" content="#526269">
+        <meta name="msapplication-navbutton-color" content="#526269">
+        <meta name="apple-mobile-web-app-status-bar-style" content="#526269">
+
         <title>{{ title | capitalize }} API</title>
 
+        <link rel="icon" href="favicon.ico" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Source+Code+Pro" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css" integrity="sha256-akwTLZec/XAFvgYgVH1T5/369lhA2Efr22xzCNl1nHs=" crossorigin="anonymous" />
 
@@ -19,225 +24,241 @@
         {% endif %}
     </head>
     <body>
-        {% if customHeader %}
-            {{ customHeader | safe }}
-        {% else %}
-            <header>
-                <h1>{{ title | capitalize }} <span>API</span></h1>
-            </header>
-        {% endif %}
 
-        <div class="documentation">
-            <div class="top-header">
-                <div class="lang-header part-header">
-                    <ul>
-                        {% for lang in languages %}
-                            <li data-lang="{{ lang.hljs }}">{{ lang.displayName }}</li>
+        <div class="wrapper">
+            {% if customHeader %}
+                {{ customHeader | safe }}
+            {% else %}
+                <header>
+                    <h1>{{ title | capitalize }} <span>API</span></h1>
+                </header>
+            {% endif %}
+
+            <section class="content">
+                {# Sidebar #}
+                <aside class="sidebar">
+                    <nav>
+                        {# Overview #}
+                        <div class="group-header">
+                            <a href="#overview">Overview</a>
+                        </div>
+
+                        {# Navigation #}
+                        {% for group in groups %}
+                            {% if group.title %}
+                                <div class="group-header">
+                                    <a href="#{{ group.id }}">{{ group.title }}</a>
+                                </div>
+                            {% endif %}
+                            <ul>
+                                {# Resources #}
+                                {% for resource in group.content %}
+                                    <li class="resource-header">
+                                        <a href="#{{ resource.id }}" class="resource-nav-item">{{ resource.title }}</a>
+                                        <ul>
+                                            {# Transitions (actions) #}
+                                            {% for transition in resource.content %}
+                                                <li class="transition">
+                                                    <a href="#{{ transition.id }}" class="child-nav-item">
+                                                        <span class="child-nav-text">{{ transition.title }}</span>
+                                                    </a>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         {% endfor %}
-                        <li data-lang="none">None</li>
-                    </ul>
-                </div>
-            </div>
+                    </nav>
+                </aside>
 
-            <div class="sidebar">
-                <nav class="sidebar-nav">
-                    {# Overview #}
-                    <div class="group-header">
-                        <a href="#overview">Overview</a>
-                    </div>
+                <div class="columns">
+                    {# Scrolling top header #}
+                    <header>
+                        <div class="lang-header">
+                            <ul>
+                                {% for lang in languages %}
+                                    <li data-lang="{{ lang.hljs }}">{{ lang.displayName }}</li>
+                                {% endfor %}
+                                <li data-lang="none">None</li>
+                            </ul>
+                        </div>
+                    </header>
 
-                    {# Navigation #}
-                    {% for group in groups %}
-                        {% if group.title %}
-                            <div class="group-header">
-                                <a href="#{{ group.id }}">{{ group.title }}</a>
+                    <main>
+                        {# Overview #}
+                        <div class="row">
+                            <div class="lhs">
+                                <div class="group-heading top" id="overview">{{ title | capitalize }}</div>
+                                {% if description %}
+                                    <div class="description">{{ description.text | safe }}</div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                        <ul>
+                            <div class="rhs"></div>
+                        </div>
+
+                        {# Resource groups #}
+                        {% for group in groups %}
+                            {% if group.title.length %}
+                                <div class="row">
+                                    <div class="lhs">
+                                        <div class="group-heading way-point" id="{{ group.id }}">{{ group.title }}</div>
+                                        {% if group.description %}
+                                            <div class="description">{{ group.description.text | safe }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="rhs"></div>
+                                </div>
+                            {% endif %}
+
                             {# Resources #}
                             {% for resource in group.content %}
-                                <li class="resource-header">
-                                    <a href="#{{ resource.id }}" class="resource-nav-item">{{ resource.title }}</a>
-                                    <ul>
-                                        {# Transitions (actions) #}
-                                        {% for transition in resource.content %}
-                                            <li class="transition">
-                                                <a href="#{{ transition.id }}" class="child-nav-item">
-                                                    <span class="child-nav-text">{{ transition.title }}</span>
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endfor %}
-                </nav>
-            </div>
-
-            <div class="container">
-                <div class="doc-body col-12">
-                    {# Overview #}
-                    <div class="row">
-                        <div class="col-6 lhs">
-                            <div class="group-heading top" id="overview">{{ title | capitalize }}</div>
-                            {% if description %}
-                                <div class="description">{{ description.text | safe }}</div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    {# Resource groups #}
-                    {% for group in groups %}
-                        {% if group.title.length %}
-                            <div class="row">
-                                <div class="col-6 lhs">
-                                    <div class="group-heading way-point" id="{{ group.id }}">{{ group.title }}</div>
-                                    {% if group.description %}
-                                        <div class="description">{{ group.description.text | safe }}</div>
-                                    {% endif %}
+                                <div class="row">
+                                    <div class="lhs">
+                                        <div class="resource-heading way-point" id="{{ resource.id }}">{{ resource.title }}</div>
+                                        {% if resource.description.text %}
+                                            <div class="description">{{ resource.description.text | safe }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="rhs"></div>
                                 </div>
-                                <div class="col-6 rhs"></div>
-                            </div>
-                        {% endif %}
 
-                        {# Resources #}
-                        {% for resource in group.content %}
-                            <div class="row">
-                                <div class="col-6 lhs">
-                                    <div class="resource-heading way-point" id="{{ resource.id }}">{{ resource.title }}</div>
-                                    {% if resource.description.text %}
-                                        <div class="description">{{ resource.description.text | safe }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-6 rhs"></div>
-                            </div>
-
-                            {# Transitions (actions) #}
-                            {% for transition in resource.content %}
-                                {% if transition.type === 'transition' %}
-                                    <div class="row">
-                                        {# Left #}
-                                        <div class="col-6 lhs">
-                                            <div class="transition-heading way-point" id="{{ transition.id }}">{{ transition.title }}</div>
-                                            {% if transition.description %}
-                                                <div class="description">{{ transition.description.text | safe }}</div>
-                                            {% endif %}
-                                            {% if transition.xhrContent.urlParameters.length %}
-                                                <h5 class="part-heading">URL Parameters</h5>
-                                                {{ macros.renderUrlParameters(transition.xhrContent.urlParameters) }}
-                                            {% endif %}
-                                            {% if transition.xhrContent.attributes.length %}
-                                                <h5 class="part-heading">Attributes</h5>
-                                                {{ macros.renderAttributes(transition.xhrContent.attributes, dataStructures) }}
-                                            {% endif %}
-                                        </div>
-
-                                        {# Right #}
-                                        <div class="col-6 rhs">
-                                            {# Definition #}
-                                            <div class="api-definition">
-                                                <div class="rhs-heading">Definition</div>
-                                                <div class="rhs-highlight code">
-                                                    <div class="hljs">
-                                                        <span class="hljs-attribute">{{ transition.xhrContent.method }}</span> {{ transition.xhrContent.originalUrl | highlightUrl | safe }}
-                                                    </div>
-                                                </div>
+                                {# Transitions (actions) #}
+                                {% for transition in resource.content %}
+                                    {% if transition.type === 'transition' %}
+                                        <div class="row">
+                                            {# Left #}
+                                            <div class="lhs">
+                                                <div class="transition-heading way-point" id="{{ transition.id }}">{{ transition.title }}</div>
+                                                {% if transition.description %}
+                                                    <div class="description">{{ transition.description.text | safe }}</div>
+                                                {% endif %}
+                                                {% if transition.xhrContent.urlParameters.length %}
+                                                    <h5 class="part-heading">URL Parameters</h5>
+                                                    {{ macros.renderUrlParameters(transition.xhrContent.urlParameters) }}
+                                                {% endif %}
+                                                {% if transition.xhrContent.attributes.length %}
+                                                    <h5 class="part-heading">Attributes</h5>
+                                                    {{ macros.renderAttributes(transition.xhrContent.attributes, dataStructures) }}
+                                                {% endif %}
                                             </div>
 
-                                            {# Request #}
-                                            <div class="rhs-heading big">Request</div>
-
-                                            {# Request Headers #}
-                                            {% if transition.transaction.request.props.headers.length %}
-                                                <div class="headers">
-                                                    <div class="rhs-heading">Request Headers</div>
+                                            {# Right #}
+                                            <div class="rhs">
+                                                {# Definition #}
+                                                <div class="api-definition">
+                                                    <div class="rhs-heading">Definition</div>
                                                     <div class="rhs-highlight code">
                                                         <div class="hljs">
-                                                            {%- for header in transition.transaction.request.props.headers -%}
-                                                                <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }}
-                                                            {%- endfor -%}
+                                                            <span class="hljs-attribute">{{ transition.xhrContent.method }}</span> {{ transition.xhrContent.originalUrl | highlightUrl | safe }}
                                                         </div>
                                                     </div>
                                                 </div>
-                                            {% endif %}
 
-                                            {# Request Body #}
-                                            {% if transition.transaction.request.body %}
-                                                <div class="rhs-heading">Request Body</div>
-                                                <div class="rhs-highlight">
-                                                    <pre><code>
-                                                        {{- transition.transaction.request.body -}}
-                                                    </code></pre>
-                                                </div>
-                                            {% endif %}
+                                                {# Request #}
+                                                {% if transition.transaction.request.props.headers.length or transition.transaction.request.body or transition.snippets %}
+                                                    <div class="rhs-heading big">Request</div>
 
-                                            {# Request Example #}
-                                            {% if transition.snippets %}
-                                                <div class="sample-request" style="display: none">
-                                                    <div class="rhs-heading">Example Request</div>
-                                                    <div class="rhs-highlight">
-                                                        {%- for lang in languages -%}
-                                                            {%- if transition.snippets[lang.name] -%}
-                                                                <pre><code class="{{ lang.hljs }}">
-                                                                    {{- transition.snippets[lang.name] -}}
-                                                                </code></pre>
-                                                            {%- endif -%}
-                                                        {% endfor -%}
-                                                    </div>
-                                                </div>
-                                            {% endif %}
-
-                                            {# Responses #}
-                                            <div class="sample-response">
-                                                {% for response in transition.transaction.responses %}
-                                                    <div class="rhs-heading big">
-                                                        <span>Response&nbsp;</span>
-                                                        <span class="status-code">{{ response.props.statusCode }}</span>
-                                                    </div>
-
-                                                    {# Headers #}
-                                                    {% if response.props.headers.length %}
+                                                    {# Request Headers #}
+                                                    {% if transition.transaction.request.props.headers.length %}
                                                         <div class="headers">
-                                                            <div class="rhs-heading">Response Headers</div>
+                                                            <div class="rhs-heading">Request Headers</div>
                                                             <div class="rhs-highlight code">
                                                                 <div class="hljs">
-                                                                    {% for header in response.props.headers %}
-                                                                        <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }} {% if not loop.last %}<br />{% endif %}
-                                                                    {% endfor %}
+                                                                    {%- for header in transition.transaction.request.props.headers -%}
+                                                                        <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }}
+                                                                    {%- endfor -%}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     {% endif %}
 
-                                                    {# Body #}
-                                                    {% if response.body %}
-                                                        <div class="rhs-heading">Response Body</div>
+                                                    {# Request Body #}
+                                                    {% if transition.transaction.request.body %}
+                                                        <div class="rhs-heading">Request Body</div>
                                                         <div class="rhs-highlight">
                                                             <pre><code>
-                                                                {{- response.body -}}
+                                                                {{- transition.transaction.request.body -}}
                                                             </code></pre>
                                                         </div>
                                                     {% endif %}
-                                                {% endfor %}
+
+                                                    {# Request Example #}
+                                                    {% if transition.snippets %}
+                                                        <div class="sample-request" style="display: none">
+                                                            <div class="rhs-heading">Example Request</div>
+                                                            <div class="rhs-highlight">
+                                                                {%- for lang in languages -%}
+                                                                    {%- if transition.snippets[lang.name] -%}
+                                                                        <pre><code class="{{ lang.hljs }}">
+                                                                            {{- transition.snippets[lang.name] -}}
+                                                                        </code></pre>
+                                                                    {%- endif -%}
+                                                                {% endfor -%}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endif %}
+
+                                                {# Responses #}
+                                                <div class="sample-response">
+                                                    {% for response in transition.transaction.responses %}
+                                                        <div class="rhs-heading big">
+                                                            <span>Response&nbsp;</span>
+                                                            <span class="status-code">{{ response.props.statusCode }}</span>
+                                                        </div>
+
+                                                        {# Headers #}
+                                                        {% if response.props.headers.length %}
+                                                            <div class="headers">
+                                                                <div class="rhs-heading">Response Headers</div>
+                                                                <div class="rhs-highlight code">
+                                                                    <div class="hljs">
+                                                                        {% for header in response.props.headers %}
+                                                                            <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }} {% if not loop.last %}<br />{% endif %}
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+
+                                                        {# Body #}
+                                                        {% if response.body %}
+                                                            <div class="rhs-heading">Response Body</div>
+                                                            <div class="rhs-highlight">
+                                                                <pre><code>
+                                                                    {{- response.body -}}
+                                                                </code></pre>
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                {% elif transition.type === 'dataStructure' %}
-                                    <div class="row">
-                                        <div class="col-6 lhs">
-                                            <div class="transition-heading way-point" id="{{ transition.id }}">{{ transition.title }}</div>
-                                            <h5 class="part-heading">Attributes</h5>
-                                            {{ macros.renderAttributes(transition.content[0], dataStructures) }}
+                                    {% elif transition.type === 'dataStructure' %}
+                                        <div class="row">
+                                            <div class="lhs">
+                                                <div class="transition-heading way-point" id="{{ transition.id }}">{{ transition.title }}</div>
+                                                <h5 class="part-heading">Attributes</h5>
+                                                {{ macros.renderAttributes(transition.content[0], dataStructures) }}
+                                            </div>
+                                            <div class="rhs"></div>
                                         </div>
-                                        <div class="col-6 rhs"></div>
-                                    </div>
-                                {% endif %}
+                                    {% endif %}
+                                {% endfor %}
                             {% endfor %}
                         {% endfor %}
-                    {% endfor %}
+                    </main>
                 </div>
-            </div>
+            </section>
+
+            {% if customFooter %}
+                {{ customFooter | safe }}
+            {% else %}
+                <footer>
+
+                </footer>
+            {% endif %}
         </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
@@ -269,11 +290,11 @@
             /**
              * Restore scroll position on (re)load
              */
-            function restoreScroll(offset) {
+            function restoreScroll(offset = 0) {
                 var lastScroll = sessionStorage && sessionStorage.getItem('lastScroll');
 
                 if (lastScroll) {
-                    $('.container').scrollTop(lastScroll);
+                    $('.content > .columns > main').scrollTop(lastScroll);
                     return;
                 }
 
@@ -283,7 +304,7 @@
 
                     if (scrollEl.length) {
                         // Scroll document container
-                        $('.container').scrollTop($(scrollEl).offset().top - offset);
+                        $('.content > .columns > main').scrollTop($(scrollEl).offset().top - offset);
 
                         // Activate menu element
                         setSelection($('.sidebar a[href=\"' + window.location.hash + '\"]'));
@@ -292,10 +313,9 @@
             }
 
             $(function() {
-                var headerHeight = $('.documentation').offset().top || 50;
 
                 // Child attributes hide/show
-                $('.doc-body .show-child-attr > span').on('click', function(e) {
+                $('.content > .columns > main .show-child-attr > span').on('click', function(e) {
                     var parent = e.target.parentNode.parentNode;
 
                     if ($(e.target).hasClass('expand') || $(e.target).hasClass('close')) {
@@ -309,14 +329,14 @@
                 });
 
                 // Language bar click handler
-                $('.top-header .lang-header [data-lang]').on('click', function(e) {
+                $('.lang-header [data-lang]').on('click', function(e) {
                     if ($(e.target).data('lang') === 'none') {
                         $('.sample-request').hide();
                     } else {
                         $('.sample-request').show();
                     }
 
-                    $('.top-header .lang-header [data-lang]').removeClass('selected');
+                    $('.lang-header [data-lang]').removeClass('selected');
                     $(e.target).addClass('selected');
 
                     $('.sample-request code').hide();
@@ -326,12 +346,12 @@
                 });
 
                 // Active language on load
-                if ($('.top-header .lang-header [data-lang]')) {
+                if ($('.lang-header [data-lang]')) {
                     var lastLang = sessionStorage.getItem('exampleLang');
-                    var selected = $('.top-header .lang-header [data-lang="' + lastLang + '"]');
+                    var selected = $('.lang-header [data-lang="' + lastLang + '"]');
 
                     if (selected.length === 0) {
-                        selected = $('.top-header .lang-header [data-lang]')[0];
+                        selected = $('.lang-header [data-lang]')[0];
                     }
 
                     if ($(selected).data('lang') == 'none') {
@@ -348,18 +368,18 @@
                 // Waypoints
                 $('.way-point[id]').waypoint({
                     continuous: false,
-                    context: $('.container'),
+                    context: $('.content > .columns > main'),
                     handler: function(direction) {
                         setSelection($('.sidebar a[href=\"#' + this.element.id + '\"]'));
                     }
                 });
 
                 // Restore scroll position
-                restoreScroll(headerHeight);
+                restoreScroll();
 
                 // Save scroll position
                 $(window).on('beforeunload', function(e) {
-                    sessionStorage && sessionStorage.setItem('lastScroll', $('.container').scrollTop());
+                    sessionStorage && sessionStorage.setItem('lastScroll', $('.content > .columns > main').scrollTop());
                 });
             });
         </script>

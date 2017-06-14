@@ -1,25 +1,26 @@
-.doc-body .group-heading {
-	font-size: 24px;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 32px;
+.group-heading {
+    color: @group-heading-color;
+    font-size: @group-heading-size;
+    font-weight: @group-heading-weight;
+    line-height: @group-heading-height;
     padding: 10px 0;
     margin: 20px 0;
 }
 
-.doc-body .resource-heading {
-	padding: 10px 0px;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 32px;
+.resource-heading {
+    color: @resource-heading-color;
+    font-weight: @resource-heading-weight;
+    font-size: @resource-heading-size;
+    line-height: @resource-heading-height;
+    padding: 10px 0px;
 }
 
-.doc-body .transition-heading {
-    color: #292e31;
+.transition-heading {
+    color: @transition-heading-color;
+    font-size: @transition-heading-size;
+    font-weight: @transition-heading-weight;
+    line-height: @transition-heading-height;
     padding: 10px 0px;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 32px
 }
 
 ul.attrs, ul.params {
@@ -90,7 +91,7 @@ li.param:last-child, li.attr:last-child {
     font-weight: 600;
 }
 .show-child-attr {
-	color: #0095dd;
+	color: @link-color;
 	padding: 6px 0;
 }
 
@@ -126,7 +127,7 @@ li.param:last-child, li.attr:last-child {
 }
 
 .part-heading {
-	color: #939da3;
+	color: @rhs-header-color;
     font-size: 12px;
     font-weight: 600;
     line-height: 18px;
