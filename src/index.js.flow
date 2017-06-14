@@ -29,13 +29,20 @@ export default async (options: Object = {}) => {
     }
 
     // Template
-    options.template = options.template || path.join(__dirname, 'themes', 'default', 'default.njk');
+    const defaultTemplate = path.join(__dirname, 'themes', 'default', 'default.njk');
+    options.template = options.template || defaultTemplate;
 
     if (!options.template.endsWith('.njk')) {
+        let templateName: string = options.template;
+
         try {
-            options.template = require.resolve('docprint-theme-' + options.template);
+            options.template = require.resolve('docprint-theme-' + templateName);
         } catch (err) {
-            throw new Error('Could not load theme: ' + options.template);
+            if (options.template !== 'default') {
+                throw new Error('Could not find theme: ' + options.template);
+            }
+
+            options.template = defaultTemplate;
         }
     }
 

@@ -40,13 +40,20 @@ exports.default = (() => {
             options.header = _fsExtra2.default.readFileSync(options.header, 'utf8');
         }
 
-        options.template = options.template || _path2.default.join(__dirname, 'themes', 'default', 'default.njk');
+        const defaultTemplate = _path2.default.join(__dirname, 'themes', 'default', 'default.njk');
+        options.template = options.template || defaultTemplate;
 
         if (!options.template.endsWith('.njk')) {
+            let templateName = options.template;
+
             try {
-                options.template = require.resolve('docprint-theme-' + options.template);
+                options.template = require.resolve('docprint-theme-' + templateName);
             } catch (err) {
-                throw new Error('Could not load theme: ' + options.template);
+                if (options.template !== 'default') {
+                    throw new Error('Could not find theme: ' + options.template);
+                }
+
+                options.template = defaultTemplate;
             }
         }
 
