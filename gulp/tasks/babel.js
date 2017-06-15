@@ -15,4 +15,4 @@ var task = function () {
         .pipe(gulp.dest('./'));
 };
 
-module.exports = [[], task];
+module.exports = task;

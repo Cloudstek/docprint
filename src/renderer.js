@@ -29,6 +29,10 @@ var _less = require('less');
 
 var _less2 = _interopRequireDefault(_less);
 
+var _lessPluginAutoprefix = require('less-plugin-autoprefix');
+
+var _lessPluginAutoprefix2 = _interopRequireDefault(_lessPluginAutoprefix);
+
 var _nunjucks = require('nunjucks');
 
 var _nunjucks2 = _interopRequireDefault(_nunjucks);
@@ -84,12 +88,21 @@ class Renderer {
     }
 
     _filterLess() {
-        this.env.addFilter('less', (file, cb) => {
+        this.env.addFilter('less', (file, kwargs, cb) => {
             let filePath = _path2.default.resolve(this.templatePath, file);
             let code = _fsExtra2.default.readFileSync(filePath, 'utf8');
 
+            let autoprefixer = new _lessPluginAutoprefix2.default({
+                browsers: cb && kwargs && kwargs.browsers || null
+            });
+
+            if (!cb) {
+                cb = kwargs;
+            }
+
             _less2.default.render(code, {
-                paths: [this.templatePath, _path2.default.resolve(this.templatePath, _path2.default.dirname(file))]
+                paths: [this.templatePath, _path2.default.resolve(this.templatePath, _path2.default.dirname(file))],
+                plugins: [autoprefixer]
             }, (err, res) => {
                 if (err) {
                     cb(err.toString());

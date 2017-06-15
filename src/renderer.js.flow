@@ -3,6 +3,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import less from 'less';
+import LessPluginAutoPrefix from 'less-plugin-autoprefix';
 import nunjucks from 'nunjucks';
 
 export class Renderer {
@@ -80,14 +81,25 @@ export class Renderer {
      * @return {void}
      */
     _filterLess(): void {
-        this.env.addFilter('less', (file, cb) => {
+        this.env.addFilter('less', (file, kwargs, cb) => {
             let filePath = path.resolve(this.templatePath, file);
             let code = fs.readFileSync(filePath, 'utf8');
+
+            let autoprefixer = new LessPluginAutoPrefix({
+                browsers: (cb && kwargs && kwargs.browsers) || null
+            });
+
+            if (!cb) {
+                cb = kwargs;
+            }
 
             less.render(code, {
                 paths: [
                     this.templatePath,
                     path.resolve(this.templatePath, path.dirname(file))
+                ],
+                plugins: [
+                    autoprefixer
                 ]
             }, (err, res) => {
                 if (err) {
