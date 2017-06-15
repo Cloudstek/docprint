@@ -1,136 +1,94 @@
-.group-heading {
-    color: @group-heading-color;
-    font-size: @group-heading-size;
-    font-weight: @group-heading-weight;
-    line-height: @group-heading-height;
-    padding: 10px 0;
-    margin: 20px 0;
-}
-
-.resource-heading {
-    color: @resource-heading-color;
-    font-weight: @resource-heading-weight;
-    font-size: @resource-heading-size;
-    line-height: @resource-heading-height;
-    padding: 10px 0px;
-}
-
-.transition-heading {
-    color: @transition-heading-color;
-    font-size: @transition-heading-size;
-    font-weight: @transition-heading-weight;
-    line-height: @transition-heading-height;
-    padding: 10px 0px;
-}
-
 ul.attrs, ul.params {
-	border-top: 1px solid #e1e8ed;
-}
+    border-top: 1px solid darken(@bg-sidebar, 10%);
 
-.params .left, .attrs .left, .params .right, .attrs .right {
-    display: inline-block;
-    width: 49.5%;
-    vertical-align: top;
-}
+    .attr, .param {
+        padding: 1em 0;
+        border-bottom: 1px solid darken(@bg-sidebar, 3%);
+        line-height: 1.5em;
 
-.params .left, .attrs .left {
-	text-align: right;
-    padding-right: 20px;
-    box-sizing: border-box;
-    font-size: 13px;
-    line-height: 21px;
-    word-break: break-all;
-    white-space: normal;
-}
+        &:last-child {
+            border-bottom: none;
+        }
 
-.params .right, .attrs .right {
-	box-sizing: border-box;
-	padding-left: 10px;
-}
+        .left, .right {
+            display: inline-block;
+            width: 49.5%;
+            vertical-align: top;
+        }
 
-li.param, li.attr {
-	padding: 17px 0;
-    border-bottom: 1px solid #f0f4f7;
-    line-height: 24px;
-}
+        .left {
+            text-align: right;
+            font-size: 0.95em;
+            padding-right: 20px;
+            line-height: 1.2;
+            word-break: break-all;
 
-li.param:last-child, li.attr:last-child {
-	border-bottom: none;
-}
+            > div {
+                padding: 0.2em 0;
+            }
 
+            .key {
+                color: @attr-color;
+                font-weight: 600;
+            }
+            .type {
+                color: @attr-type-color;
+                font-style: italic;
+            }
+            .example {
+                color: @attr-type-color;
+            }
+            .required {
+                font-size: 0.9em;
+                color: @required-color;
+                text-transform: uppercase;
+            }
+            .optional {
+                font-size: 0.9em;
+                color: @optional-color;
+                text-transform: uppercase;
+            }
+        }
+    }
 
-.left {
-	color: #aaa;
-}
+    .show-child-attr {
+    	color: @link-color;
+        cursor: pointer;
+    	padding: 6px 0;
+    }
 
-.left span {
-	padding-right: 10px;
-}
+    .child-attr {
+        border-radius: 5px;
 
-.left .key {
-    color: #000;
-}
+        .attrs {
+            display: none;
+            border-top: none;
+        }
 
-.left span.key{
-	font-weight: 600;
-}
+        > .show-child-attr .expand {
+            display: block;
+            cursor: pointer;
+        }
 
-.left .type {
-	font-style: italic;
-	font-size: 12px;
-}
+        > .show-child-attr .close {
+            display: none;
+            cursor: pointer;
+        }
 
-.left .example {
-	font-size: 11px;
-}
+        &.show {
+            background-color: @bg-sidebar;
 
-.left .required, .left .optional {
-	color: #e66e33;
-	text-transform: uppercase;
-	font-size: 10px;
-    font-weight: 600;
-}
-.show-child-attr {
-	color: @link-color;
-	padding: 6px 0;
-}
+            .attrs {
+                display: block;
+            }
 
-.child-attr {
-	border-radius: 5px;
-}
+            > .show-child-attr .expand {
+                display: none;
+            }
 
-.child-attr > .attrs {
-	display: none;
-}
-
-.child-attr > .show-child-attr > .expand {
-	display: block;
-	cursor: pointer;
-}
-.child-attr > .show-child-attr > .close {
-	display: none;
-	cursor: pointer;
-}
-
-.child-attr.show {
-	box-shadow: 0 0 1px 0px rgba(128, 128, 128, 0.5);
-}
-
-.child-attr.show > .attrs{
-	display: block;
-}
-.child-attr.show > .show-child-attr > .expand {
-	display: none;
-}
-.child-attr.show > .show-child-attr > .close {
-	display: block;
-}
-
-.part-heading {
-	color: @rhs-header-color;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 18px;
-    text-transform: uppercase;
-    margin: 15px 0;
+            > .show-child-attr .close {
+                display: block;
+            }
+        }
+    }
 }

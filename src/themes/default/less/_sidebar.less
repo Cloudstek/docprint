@@ -1,29 +1,21 @@
 .sidebar {
-	font-family: 'Open Sans', sans-serif;
-	bottom: 0;
-	font-weight: 400;
-    left: 0;
-    position: absolute;
-    top: 0;
-    z-index: 75;
     width: @sidebar-width;
-	padding: 20px;
-	padding-top: 45px;
-	background: @sidebar-bg;
+	padding: 45px 20px 20px;
+	background: @bg-sidebar;
 
     nav {
-        .group-header {
-        	color: @lhs-header-color;
+        .group-heading {
+        	color: @lhs-heading-color;
         	font-weight: 600;
-        	font-size: 13px;
         	text-transform: uppercase;
+            font-size: 0.9em;
         }
 
         > ul {
             margin: 0.75em 0 1.25em 0.5em;
         }
 
-        .resource-header {
+        .resource-heading {
             > ul{
             	display: none;
             }

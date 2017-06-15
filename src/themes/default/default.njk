@@ -39,21 +39,21 @@
                 <aside class="sidebar">
                     <nav>
                         {# Overview #}
-                        <div class="group-header">
+                        <div class="group-heading">
                             <a href="#overview">Overview</a>
                         </div>
 
                         {# Navigation #}
                         {% for group in groups %}
                             {% if group.title %}
-                                <div class="group-header">
+                                <div class="group-heading">
                                     <a href="#{{ group.id }}">{{ group.title }}</a>
                                 </div>
                             {% endif %}
                             <ul>
                                 {# Resources #}
                                 {% for resource in group.content %}
-                                    <li class="resource-header">
+                                    <li class="resource-heading">
                                         <a href="#{{ resource.id }}" class="resource-nav-item">{{ resource.title }}</a>
                                         <ul>
                                             {# Transitions (actions) #}
@@ -89,7 +89,7 @@
                         {# Overview #}
                         <div class="row">
                             <div class="lhs">
-                                <div class="group-heading top" id="overview">{{ title | capitalize }}</div>
+                                <h1 id="overview">{{ title | capitalize }}</h1>
                                 {% if description %}
                                     <div class="description">{{ description.text | safe }}</div>
                                 {% endif %}
@@ -102,7 +102,7 @@
                             {% if group.title.length %}
                                 <div class="row">
                                     <div class="lhs">
-                                        <div class="group-heading way-point" id="{{ group.id }}">{{ group.title }}</div>
+                                        <h2 class="group-heading waypoint" id="{{ group.id }}">{{ group.title | capitalize }}</h2>
                                         {% if group.description %}
                                             <div class="description">{{ group.description.text | safe }}</div>
                                         {% endif %}
@@ -115,7 +115,7 @@
                             {% for resource in group.content %}
                                 <div class="row">
                                     <div class="lhs">
-                                        <div class="resource-heading way-point" id="{{ resource.id }}">{{ resource.title }}</div>
+                                        <h3 class="resource-heading waypoint" id="{{ resource.id }}">{{ resource.title }}</h3>
                                         {% if resource.description.text %}
                                             <div class="description">{{ resource.description.text | safe }}</div>
                                         {% endif %}
@@ -129,16 +129,16 @@
                                         <div class="row">
                                             {# Left #}
                                             <div class="lhs">
-                                                <div class="transition-heading way-point" id="{{ transition.id }}">{{ transition.title }}</div>
+                                                <h4 class="transition-heading waypoint" id="{{ transition.id }}">{{ transition.title }}</h4>
                                                 {% if transition.description %}
                                                     <div class="description">{{ transition.description.text | safe }}</div>
                                                 {% endif %}
                                                 {% if transition.xhrContent.urlParameters.length %}
-                                                    <h5 class="part-heading">URL Parameters</h5>
+                                                    <h6 class="part-heading">URL Parameters</h6>
                                                     {{ macros.renderUrlParameters(transition.xhrContent.urlParameters) }}
                                                 {% endif %}
                                                 {% if transition.xhrContent.attributes.length %}
-                                                    <h5 class="part-heading">Attributes</h5>
+                                                    <h6 class="part-heading">Attributes</h6>
                                                     {{ macros.renderAttributes(transition.xhrContent.attributes, dataStructures) }}
                                                 {% endif %}
                                             </div>
@@ -147,7 +147,7 @@
                                             <div class="rhs">
                                                 {# Definition #}
                                                 <div class="api-definition">
-                                                    <div class="rhs-heading">Definition</div>
+                                                    <h6 class="rhs-heading">Definition</h6>
                                                     <div class="rhs-highlight code">
                                                         <div class="hljs">
                                                             <span class="hljs-attribute">{{ transition.xhrContent.method }}</span> {{ transition.xhrContent.originalUrl | highlightUrl | safe }}
@@ -157,61 +157,63 @@
 
                                                 {# Request #}
                                                 {% if transition.transaction.request.props.headers.length or transition.transaction.request.body or transition.snippets %}
-                                                    <div class="rhs-heading big">Request</div>
+                                                    <div class="request">
+                                                        <h5 class="rhs-heading">Request</h5>
 
-                                                    {# Request Headers #}
-                                                    {% if transition.transaction.request.props.headers.length %}
-                                                        <div class="headers">
-                                                            <div class="rhs-heading">Request Headers</div>
-                                                            <div class="rhs-highlight code">
-                                                                <div class="hljs">
-                                                                    {%- for header in transition.transaction.request.props.headers -%}
-                                                                        <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }}
-                                                                    {%- endfor -%}
+                                                        {# Request Headers #}
+                                                        {% if transition.transaction.request.props.headers.length %}
+                                                            <div class="headers">
+                                                                <h6 class="rhs-heading">Request Headers</h6>
+                                                                <div class="rhs-highlight code">
+                                                                    <div class="hljs">
+                                                                        {%- for header in transition.transaction.request.props.headers -%}
+                                                                            <span class="hljs-attribute">{{ header.key.content }}</span>: {{ header.value.content }}
+                                                                        {%- endfor -%}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    {% endif %}
+                                                        {% endif %}
 
-                                                    {# Request Body #}
-                                                    {% if transition.transaction.request.body %}
-                                                        <div class="rhs-heading">Request Body</div>
-                                                        <div class="rhs-highlight">
-                                                            <pre><code>
-                                                                {{- transition.transaction.request.body -}}
-                                                            </code></pre>
-                                                        </div>
-                                                    {% endif %}
-
-                                                    {# Request Example #}
-                                                    {% if transition.snippets %}
-                                                        <div class="sample-request" style="display: none">
-                                                            <div class="rhs-heading">Example Request</div>
+                                                        {# Request Body #}
+                                                        {% if transition.transaction.request.body %}
+                                                            <h6 class="rhs-heading">Request Body</h6>
                                                             <div class="rhs-highlight">
-                                                                {%- for lang in languages -%}
-                                                                    {%- if transition.snippets[lang.name] -%}
-                                                                        <pre><code class="{{ lang.hljs }}">
-                                                                            {{- transition.snippets[lang.name] -}}
-                                                                        </code></pre>
-                                                                    {%- endif -%}
-                                                                {% endfor -%}
+                                                                <pre><code>
+                                                                    {{- transition.transaction.request.body -}}
+                                                                </code></pre>
                                                             </div>
-                                                        </div>
-                                                    {% endif %}
+                                                        {% endif %}
+
+                                                        {# Request Example #}
+                                                        {% if transition.snippets %}
+                                                            <div class="sample-request" style="display: none">
+                                                                <h6 class="rhs-heading">Example Request</h6>
+                                                                <div class="rhs-highlight">
+                                                                    {%- for lang in languages -%}
+                                                                        {%- if transition.snippets[lang.name] -%}
+                                                                            <pre><code class="{{ lang.hljs }}">
+                                                                                {{- transition.snippets[lang.name] -}}
+                                                                            </code></pre>
+                                                                        {%- endif -%}
+                                                                    {% endfor -%}
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
                                                 {% endif %}
 
                                                 {# Responses #}
                                                 <div class="sample-response">
                                                     {% for response in transition.transaction.responses %}
-                                                        <div class="rhs-heading big">
+                                                        <h5 class="rhs-heading">
                                                             <span>Response&nbsp;</span>
                                                             <span class="status-code">{{ response.props.statusCode }}</span>
-                                                        </div>
+                                                        </h5>
 
                                                         {# Headers #}
                                                         {% if response.props.headers.length %}
                                                             <div class="headers">
-                                                                <div class="rhs-heading">Response Headers</div>
+                                                                <h6 class="rhs-heading">Response Headers</h6>
                                                                 <div class="rhs-highlight code">
                                                                     <div class="hljs">
                                                                         {% for header in response.props.headers %}
@@ -224,7 +226,7 @@
 
                                                         {# Body #}
                                                         {% if response.body %}
-                                                            <div class="rhs-heading">Response Body</div>
+                                                            <h6 class="rhs-heading">Response Body</h6>
                                                             <div class="rhs-highlight">
                                                                 <pre><code>
                                                                     {{- response.body -}}
@@ -238,8 +240,8 @@
                                     {% elif transition.type === 'dataStructure' %}
                                         <div class="row">
                                             <div class="lhs">
-                                                <div class="transition-heading way-point" id="{{ transition.id }}">{{ transition.title }}</div>
-                                                <h5 class="part-heading">Attributes</h5>
+                                                <h4 class="transition-heading waypoint" id="{{ transition.id }}">{{ transition.title }}</h4>
+                                                <h6 class="part-heading">Attributes</h6>
                                                 {{ macros.renderAttributes(transition.content[0], dataStructures) }}
                                             </div>
                                             <div class="rhs"></div>
@@ -275,14 +277,14 @@
              */
             function setSelection(el) {
                 if ($(el).hasClass('resource-nav-item')) {
-                    $('.sidebar .resource-header.expand').removeClass('expand');
+                    $('.sidebar .resource-heading.expand').removeClass('expand');
                     $(el).parent().addClass('expand');
                 } else if ($(el).hasClass('child-nav-item')) {
                     $('.sidebar .child-nav-item.selected').removeClass('selected');
                     $(el).addClass('selected');
-                    $(el).parents('.resource-header').addClass('expand');
-                } else if ($(el).parent().hasClass('group-header')) {
-                    $('.sidebar .resource-header.expand').removeClass('expand');
+                    $(el).parents('.resource-heading').addClass('expand');
+                } else if ($(el).parent().hasClass('group-heading')) {
+                    $('.sidebar .resource-heading.expand').removeClass('expand');
                     $('.sidebar .child-nav-item.selected').removeClass('selected');
                 }
             }
@@ -315,8 +317,8 @@
             $(function() {
 
                 // Child attributes hide/show
-                $('.content > .columns > main .show-child-attr > span').on('click', function(e) {
-                    var parent = e.target.parentNode.parentNode;
+                $('.content > .columns > main .show-child-attr span').on('click', function(e) {
+                    var parent = $(e.target).parents('.child-attr')[0];
 
                     if ($(e.target).hasClass('expand') || $(e.target).hasClass('close')) {
                         $(parent).toggleClass('show');
@@ -331,16 +333,24 @@
                 // Language bar click handler
                 $('.lang-header [data-lang]').on('click', function(e) {
                     if ($(e.target).data('lang') === 'none') {
-                        $('.sample-request').hide();
+                        $('.request .sample-request').hide();
+                        $('.request').each(function() {
+                            var visible = $(this).children(':not(h5.rhs-heading):visible').length;
+
+                            if (visible === 0) {
+                                $(this).hide();
+                            }
+                        })
                     } else {
-                        $('.sample-request').show();
+                        $('.rhs .request').show();
+                        $('.request .sample-request').show();
                     }
 
                     $('.lang-header [data-lang]').removeClass('selected');
                     $(e.target).addClass('selected');
 
-                    $('.sample-request code').hide();
-                    $('.sample-request code[class~="' + $(e.target).data('lang') + '"]').show();
+                    $('.request .sample-request code').hide();
+                    $('.request .sample-request code[class~="' + $(e.target).data('lang') + '"]').show();
 
                     sessionStorage && sessionStorage.setItem('exampleLang', $(e.target).data('lang'));
                 });
@@ -366,7 +376,7 @@
                 }
 
                 // Waypoints
-                $('.way-point[id]').waypoint({
+                $('.waypoint[id]').waypoint({
                     continuous: false,
                     context: $('.content > .columns > main'),
                     handler: function(direction) {

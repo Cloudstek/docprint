@@ -1,6 +1,7 @@
 @import '_vars';
 @import '_left';
 @import '_right';
+@import '_sidebar';
 
 * {
 	outline: none;
@@ -32,25 +33,80 @@ ul {
 	list-style: none;
 }
 
-h2 {
-	font-size: 24px;
-    font-weight: 400;
-    padding: 10px 0px;
-}
-
-mark {
-    background: transparent;
-    border-radius: 3px;
-    color: yellow;
-}
-
 pre {
 	margin: 0;
 }
 
-/**
- * Content wrapper
- */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 400;
+    margin: 0;
+
+    .lhs {
+        color: @lhs-heading-color;
+    }
+    .rhs {
+        color: @rhs-heading-color;
+    }
+}
+
+h1 {
+    font-size: 2em;
+    font-weight: 600;
+
+    span {
+        font-weight: 300;
+    }
+}
+
+h2 {
+    font-size: 1.8em;
+}
+
+h3 {
+    font-size: 1.6em;
+}
+
+h4 {
+    font-size: 1.4em;
+}
+
+h5 {
+    font-size: 1.2em;
+
+    &.rhs-heading {
+        font-weight: 600;
+        margin: 0;
+        padding: 15px 0 20px 0;
+
+        .status-code {
+            padding: @status-code-padding;
+            display: inline-block;
+            background: @status-code-bg;
+            border-radius: @status-code-radius;
+        }
+    }
+}
+
+h6 {
+    font-size: 1em;
+
+    &.rhs-heading {
+        font-weight: 600;
+        margin: 0;
+        padding: 0 0 15px 0;
+    }
+
+    &.part-heading {
+		color: @rhs-heading-color;
+	    font-size: 1em;
+	    font-weight: 600;
+	    line-height: 18px;
+	    text-transform: uppercase;
+	    margin: 15px 0;
+	}
+}
+
+// Body wrapper
 .wrapper {
     height: 100vh;
     display: flex;
@@ -75,6 +131,7 @@ pre {
     }
 }
 
+// Content wrapper
 .content {
     display: flex;
     flex: 1;
@@ -86,11 +143,11 @@ pre {
         width: @sidebar-width;
     	padding: 20px;
     	padding-top: 45px;
-    	background: @sidebar-bg;
+    	background: @bg-sidebar;
 
         nav {
             .group-header {
-            	color: @lhs-header-color;
+            	color: @lhs-heading-color;
             	font-weight: 600;
             	font-size: 13px;
             	text-transform: uppercase;
@@ -134,6 +191,7 @@ pre {
         flex-direction: column;
         position: relative;
 
+        // Scrolling header
         > header {
             width: 100%;
             z-index: 999;
@@ -171,6 +229,7 @@ pre {
             }
         }
 
+        // Main content
         > main {
             position: relative;
             overflow-x: hidden;
@@ -195,12 +254,9 @@ pre {
                 .rhs {
                     color: #dde4e8;
                     background-color: @bg-dark;
+                    padding-top: 3em;
                 }
             }
         }
     }
-}
-
-.header-anchor {
-	visibility: hidden;
 }

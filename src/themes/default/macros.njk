@@ -54,7 +54,7 @@
                                 {% endif %}
 
                                 {# Required / Optional #}
-                                
+
                                 {% if attribute.attributes.typeAttributes and attribute.attributes.typeAttributes | includes('required') %}
                                     <span class="required">Required</span>
                                 {% elif attribute.attributes.typeAttributes and attribute.attributes.typeAttributes | includes('optional') %}
@@ -86,14 +86,16 @@
                             {% if attContent.value.element === 'object' %}
                             {# Object #}
                                 <div class="child-attr">
-                                    <div class="show-child-attr left">
-                                        {% if attContent.key.content %}
-                                            <span class="expand">Expand attributes</span>
-                                            <span class="close">Close attributes</span>
-                                        {% else %}
-                                            <span class="expand">Expand properties</span>
-                                            <span class="close">Close properties</span>
-                                        {% endif %}
+                                    <div class="show-child-attr">
+                                        <div class="left">
+                                            {% if attContent.key.content %}
+                                                <span class="expand">Expand attributes</span>
+                                                <span class="close">Close attributes</span>
+                                            {% else %}
+                                                <span class="expand">Expand properties</span>
+                                                <span class="close">Close properties</span>
+                                            {% endif %}
+                                        </div>
                                     </div>
 
                                     {{ renderAttributes(attContent.value, dataStructures) }}
@@ -103,14 +105,16 @@
                                 {% set selectedDs = dataStructures | find('id', attContent.value.element) %}
                                 {% if selectedDs.content %}
                                     <div class="child-attr">
-                                        <div class="show-child-attr left">
-                                            {% if attContent.key.content %}
-                                                <span class="expand">Expand attributes</span>
-                                                <span class="close">Close attributes</span>
-                                            {% else %}
-                                                <span class="expand">Expand properties</span>
-                                                <span class="close">Close properties</span>
-                                            {% endif %}
+                                        <div class="show-child-attr">
+                                            <div class="left">
+                                                {% if attContent.key.content %}
+                                                    <span class="expand">Expand attributes</span>
+                                                    <span class="close">Close attributes</span>
+                                                {% else %}
+                                                    <span class="expand">Expand properties</span>
+                                                    <span class="close">Close properties</span>
+                                                {% endif %}
+                                            </div>
                                         </div>
 
                                         {{ renderAttributes(selectedDs.content, dataStructures) }}
