@@ -128,8 +128,9 @@
         </ul>
     {% else %}
     {# Not an object, probably a data structure #}
-        {% set selectedDs = dataStructures | find('id', attContent.value.element) %}
-        {% if selectedDs.content %}
+        {% set selectedDs = dataStructures | find('id', attributes.element) %}
+
+        {% if selectedDs %}
             {{ renderAttributes(selectedDs.content, dataStructures) }}
         {% endif %}
     {% endif %}

@@ -34,15 +34,13 @@ export class RefractParser {
             throw new Error('Input is not a valid refract object.');
         }
 
-        // Data structures
-        let ds = doc.content[0].content || null;
-        ds = ds && ds.find(el => el.type === 'dataStructures');
+        let result: ?Object = (doc && doc.content && doc.content.length > 0) ? this._parse(doc.content[0], {}, {type: 'result'}).current : null;
 
         return {
             type: 'result',
-            dataStructures: (ds && ds.content) || [],
             languages: this.options.languages,
-            content: doc.content && doc.content.length > 0 && this._parse(doc.content[0], {}, {type: 'result'}).current
+            content: result,
+            dataStructures: this._getDataStructures(result)
         };
     }
 
@@ -430,5 +428,21 @@ export class RefractParser {
             bodySize: -1,
             comment: ''
         };
+    }
+
+    /**
+     * Get data structures from document
+     * @param {Object} doc Parsed result document
+     * @return {Array.Object|null} Data structures
+     */
+    _getDataStructures(doc: ?Object): ?Array<Object> {
+        if (!doc) {
+            return null;
+        }
+
+        // Find data structures
+        let structures = doc.content.find(el => el.type === 'dataStructures');
+
+        return structures ? structures.content : null;
     }
 }
